@@ -20,12 +20,10 @@ I'm using Ubuntu (linux) with a 86x 64 bit processor and 42 School student compu
 
 # Some sources so you can learn the necessary stuff.
 
-A short video to explain assembly in 100 secondes: https://www.youtube.com/watch?v=4gwYkEK0gOk
-Syntax, difference between AT&T and Intel: https://imada.sdu.dk/u/kslarsen/dm546/Material/IntelnATT.htm
+- A short video to explain assembly in 100 secondes: https://www.youtube.com/watch?v=4gwYkEK0gOk
+- Syntax, difference between AT&T and Intel: https://imada.sdu.dk/u/kslarsen/dm546/Material/IntelnATT.htm
+- English assembly tutorial: https://www.tutorialspoint.com/assembly_programming/index.htm
+- French assembly tutorial: https://lacl.u-pec.fr/tan/asm.pdf
+- syscall table for x86-60: https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64
 
-English assembly tutorial: https://www.tutorialspoint.com/assembly_programming/index.htm
-French assembly tutorial: https://lacl.u-pec.fr/tan/asm.pdf
-
-syscall table for x86-60: https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64
-
-42docs: https://harm-smits.github.io/42docs/projects/libasm
+- 42docs: https://harm-smits.github.io/42docs/projects/libasm
