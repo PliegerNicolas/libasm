@@ -14,6 +14,6 @@
 
 int	main(void)
 {
-	ft_strlen("Pomme");
+	printf("%ld\n", ft_strlen("Pomme et banane !"));
 	return (0);
 }
