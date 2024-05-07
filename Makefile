@@ -46,7 +46,7 @@ ASM_EXTENSION				:=				.s
 
 ASM_SOURCES_NAMES			:=				hello-world \
 
-ASM_SOURCES_NAMES_BONUS		:=				bonus \
+ASM_SOURCES_NAMES_BONUS		:=				bonus/bonus \
 
 ifeq (bonus, $(filter bonus, $(MAKECMDGOALS)))
 	ASM_SOURCES_NAMES		+=				$(ASM_SOURCES_NAMES_BONUS)
@@ -57,7 +57,7 @@ ASM_SOURCES					:=				$(addsuffix $(ASM_EXTENSION), $(SORTED_ASM_SOURCES_NAMES))
 
 #* CC SOURCES *#
 
-CC_SOURCES_NAMES			:=				main \
+CC_SOURCES_NAMES			:=				tester/main \
 
 SORTED_CC_SOURCES_NAMES		:=				$(sort $(CC_SOURCES_NAMES))
 CC_SOURCES					:=				$(addsuffix $(CC_EXTENSION), $(SORTED_CC_SOURCES_NAMES))
@@ -66,6 +66,11 @@ CC_SOURCES					:=				$(addsuffix $(CC_EXTENSION), $(SORTED_CC_SOURCES_NAMES))
 
 ASM_OBJECTS					:=				$(addprefix $(OBJECTS_PATH)/, $(ASM_SOURCES:$(ASM_EXTENSION)=.o))
 CC_OBJECTS					:=				$(addprefix $(OBJECTS_PATH)/, $(CC_SOURCES:$(CC_EXTENSION)=.o))
+
+#* CC HEADERS *#
+
+HEADERS_PATH		:=		./includes
+INCLUDE_FLAGS		:=		$(addprefix -I , $(HEADERS_PATH))
 
 #* CC DEPENDENCIES *#
 
