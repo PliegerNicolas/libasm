@@ -44,7 +44,12 @@ ASM_EXTENSION				:=				.s
 
 #* ASM SOURCES *#
 
-ASM_SOURCES_NAMES			:=				hello-world \
+ASM_SOURCES_NAMES			:=				ft_read \
+											ft_strcmp \
+											ft_strcpy \
+											ft_strdup \
+											ft_strlen \
+											ft_write \
 
 ASM_SOURCES_NAMES_BONUS		:=				\
 

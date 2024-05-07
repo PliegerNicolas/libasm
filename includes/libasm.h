@@ -6,7 +6,7 @@
 /*   By: rishmor <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/07 11:34:04 by rishmor           #+#    #+#             */
-/*   Updated: 2024/05/07 11:34:05 by rishmor          ###   ########.fr       */
+/*   Updated: 2024/05/07 12:11:12 by rishmor          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,6 @@
 # include <stdlib.h>
 # include <stdio.h>
 
-extern void hello_world();
+size_t ft_strlen(const char *str);
 
 #endif
