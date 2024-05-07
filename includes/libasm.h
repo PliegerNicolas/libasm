@@ -13,6 +13,8 @@
 #ifndef LIBASM_H
 # define LIBASM_H
 
+# include <errno.h>
+
 # include <unistd.h>
 # include <fcntl.h>
 # include <string.h>

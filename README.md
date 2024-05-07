@@ -25,3 +25,7 @@ Syntax, difference between AT&T and Intel: https://imada.sdu.dk/u/kslarsen/dm546
 
 English assembly tutorial: https://www.tutorialspoint.com/assembly_programming/index.htm
 French assembly tutorial: https://lacl.u-pec.fr/tan/asm.pdf
+
+syscall table for x86-60: https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64
+
+42docs: https://harm-smits.github.io/42docs/projects/libasm
