@@ -46,7 +46,7 @@ ASM_EXTENSION				:=				.s
 
 ASM_SOURCES_NAMES			:=				hello-world \
 
-ASM_SOURCES_NAMES_BONUS		:=				bonus/bonus \
+ASM_SOURCES_NAMES_BONUS		:=				\
 
 ifeq (bonus, $(filter bonus, $(MAKECMDGOALS)))
 	ASM_SOURCES_NAMES		+=				$(ASM_SOURCES_NAMES_BONUS)

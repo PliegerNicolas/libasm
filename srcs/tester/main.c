@@ -14,6 +14,6 @@
 
 int	main(void)
 {
-	printf("Salut !\n");
+	hello_world();
 	return (0);
 }

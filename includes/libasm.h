@@ -19,4 +19,6 @@
 # include <stdlib.h>
 # include <stdio.h>
 
+extern void hello_world();
+
 #endif

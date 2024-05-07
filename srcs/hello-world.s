@@ -1,15 +1,19 @@
 section .data
-	; Constants
-
-section .bss
-	; Variables
+    hello_msg db 'Hello world!', 10
+	len equ $ - hello_msg
 
 section .text
-	global _start	; Entry point for linker
+    global hello_world
 
-	_start:			; Code start here.
+hello_world:
+    ; Use relative addressing for accessing hello_msg
+    mov rax, 1              ; syscall number for sys_write
+    mov rdi, 1              ; file descriptor STDOUT
+    lea rsi, [rel hello_msg]		; relative address of hello_msg
+    mov rdx, len            ; length of the message
+    syscall
 
-	; End program
-	mov	rax, 60		; sys_exit
-	mov	rdi, 0		; error code 0 (success)
-	syscall
+    ; Exit the program
+    mov rax, 60             ; syscall number for sys_exit
+    xor rdi, rdi            ; error code 0 (success)
+    syscall
