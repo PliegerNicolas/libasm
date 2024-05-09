@@ -29,4 +29,4 @@ extern __errno_location                     ; Declare external symbol for errno.
         mov rax, -1                         ; Set return value (rax) to -1.
 
     .end:
-        ret                         ; Return length stored in rax (default).
+        ret                                 ; Return length stored in rax (default).

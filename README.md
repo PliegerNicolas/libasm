@@ -27,3 +27,4 @@ I'm using Ubuntu (linux) with a 86x 64 bit processor and 42 School student compu
 - syscall table for x86-60: https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64
 
 - 42docs: https://harm-smits.github.io/42docs/projects/libasm
+- Student tutorial: https://gaultier.github.io/blog/x11_x64.html

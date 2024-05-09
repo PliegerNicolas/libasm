@@ -1,4 +1,4 @@
-global ft_strlen            ; entry-point for linker.
+global ft_strlen                    ; entry-point for linker.
 
     ft_strlen:
         ; Arguments:
@@ -7,8 +7,8 @@ global ft_strlen            ; entry-point for linker.
         ;   rax - Length of the string excluding null terminator.
 
         ; Initialize counter
-        xor rax, rax                ; Set counter to 0 through XOR operation,
-                                    ;   who sometimes more efficient than mov.
+        xor rax, rax                ; Initialize return value to 0 through XOR operation,
+                                    ;   who is sometimes more efficient than mov.
 
     .loop:                          ; Loop through string.
         cmp byte [rdi], 0           ; Dereference and compare the first 

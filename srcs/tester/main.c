@@ -136,11 +136,108 @@ void	test_write()
 	//printf("%sResult: %ld, %s%s\n", TEST_COLOR, o, strerror(errno), RESET_COLOR);
 }
 
+void	test_read()
+{
+	char		buffer[1024] = { 0 };
+	int			fd_file1 = 0;
+	int			fd_file2 = 0;
+	long int	o1 = 0;
+	long int	o2 = 0;
+
+	// Read from STDIN. Commented out because annoying but works.
+	/*
+	errno = 0;
+	printf("Test_read nº1: from fd %d (console)\n", fd_file1);
+	o1 = read(fd_file1, buffer, sizeof(buffer) - 1);
+	printf("%sResult of read: %ld, %s%s\n", EXPECTED_COLOR, o1, strerror(errno), RESET_COLOR);
+	bzero(buffer, sizeof(buffer));
+	errno = 0;
+	o1 = ft_read(fd_file1, buffer, sizeof(buffer) - 1);
+	printf("%sResult of ft_read: %ld, %s%s\n", TEST_COLOR, o1, strerror(errno), RESET_COLOR);
+	bzero(buffer, sizeof(buffer));
+	*/
+
+	// Read from invalid fd
+	fd_file1 = -1;
+	errno = 0;
+	printf("Test_read nº2: from fd %d (console)\n", fd_file1);
+	o1 = read(fd_file1, buffer, sizeof(buffer) - 1);
+	printf("%sResult of read: %ld, %s%s\n", EXPECTED_COLOR, o1, strerror(errno), RESET_COLOR);
+	bzero(buffer, sizeof(buffer));
+	errno = 0;
+	o1 = ft_read(fd_file1, buffer, sizeof(buffer) - 1);
+	printf("%sResult of ft_read: %ld, %s%s\n", TEST_COLOR, o1, strerror(errno), RESET_COLOR);
+	bzero(buffer, sizeof(buffer));
+
+	// Read entire file in parallel.
+	fd_file1 = open("Makefile", O_RDONLY);
+	fd_file2 = open("Makefile", O_RDONLY);
+	o1 = 1;
+	o2 = 1;
+	printf("Test_read nº3: read total file simultaneously with fds %d and %d\n", fd_file1, fd_file2);
+	while (o1 && o2)
+	{
+		errno = 0;
+		o1 = read(fd_file1, buffer, sizeof(buffer) - 1);
+		printf("%sResult of read: %ld: %s, %s%s\n", EXPECTED_COLOR, o1, buffer, strerror(errno), RESET_COLOR);
+		bzero(buffer, sizeof(buffer));
+		errno = 0;
+		o2 = ft_read(fd_file2, buffer, sizeof(buffer) - 1);
+		printf("%sResult of ft_read: %ld: %s, %s%s\n", TEST_COLOR, o2, buffer, strerror(errno), RESET_COLOR);
+		bzero(buffer, sizeof(buffer));
+	}
+	close(fd_file1);
+	close(fd_file2);
+	fd_file1 = 0;
+	fd_file2 = 0;
+}
+
+void	test_strcmp()
+{
+	char	*str1 = NULL;
+	char	*str2 = NULL;
+
+	str1 = "abc";
+	str2 = "abc";
+	printf("Test_strcmp nº1: str1: '%s' with str2: '%s'\n", str1, str2);
+	printf("%sExpecting: %d%s\n", EXPECTED_COLOR, strcmp(str1, str2), RESET_COLOR);
+	printf("%sResult: %d%s\n", TEST_COLOR, ft_strcmp(str1, str2), RESET_COLOR);
+
+	str1 = "";
+	str2 = "";
+	printf("Test_strcmp nº2: str1: '%s' with str2: '%s'\n", str1, str2);
+	printf("%sExpecting: %d%s\n", EXPECTED_COLOR, strcmp(str1, str2), RESET_COLOR);
+	printf("%sResult: %d%s\n", TEST_COLOR, ft_strcmp(str1, str2), RESET_COLOR);
+
+	str1 = "abc";
+	str2 = "abcd";
+	printf("Test_strcmp nº3: str1: '%s' with str2: '%s'\n", str1, str2);
+	printf("%sExpecting: %d%s\n", EXPECTED_COLOR, strcmp(str1, str2), RESET_COLOR);
+	printf("%sResult: %d%s\n", TEST_COLOR, ft_strcmp(str1, str2), RESET_COLOR);
+
+	str1 = "Salut ça va ?";
+	str2 = "Plutôt bien mon gars !!!";
+	printf("Test_strcmp nº4: str1: '%s' with str2: '%s'\n", str1, str2);
+	printf("%sExpecting: %d%s\n", EXPECTED_COLOR, strcmp(str1, str2), RESET_COLOR);
+	printf("%sResult: %d%s\n", TEST_COLOR, ft_strcmp(str1, str2), RESET_COLOR);
+
+	// Commented out, because the original and mine result in UB (segfault).
+	str1 = NULL;
+	str2 = "a";
+	//printf("Test_strcmp nº5: str1: '%s' with str2: '%s'\n", str1, str2);
+	//printf("%sExpecting: %d%s\n", EXPECTED_COLOR, strcmp(str1, str2), RESET_COLOR);
+	//printf("%sResult: %d%s\n", TEST_COLOR, ft_strcmp(str1, str2), RESET_COLOR);
+}
+
 int	main(void)
 {
 	test_strlen();
 	printf("\n");
 	test_write();
+	printf("\n");
+	test_read();
+	printf("\n");
+	test_strcmp();
 	printf("\n");
 
 	return (0);
