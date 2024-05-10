@@ -1,26 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   libasm_tester.h                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rishmor <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/05/07 10:13:28 by rishmor           #+#    #+#             */
-/*   Updated: 2024/05/07 12:11:25 by rishmor          ###   ########.fr       */
+/*   Created: 2024/05/10 12:36:52 by rishmor           #+#    #+#             */
+/*   Updated: 2024/05/10 12:36:54 by rishmor          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libasm.h"
-#include "libasm_tester.h"
+#ifndef LIBASM_TESTER_H
+# define LIBASM_TESTER_H
 
-int	main(void)
-{
-	test_ft_read();
-	test_ft_strcmp();
-	test_ft_strcpy();
-	test_ft_strdup();
-	test_ft_strlen();
-	test_ft_write();
+# define GREEN "\x1b[32m"
+# define YELLOW "\x1b[33m"
+# define RESET_COLOR "\x1b[0m"
 
-	return (0);
-}
+# include <time.h>
+
+void    test_ft_read();
+void    test_ft_strcmp();
+void    test_ft_strcpy();
+void    test_ft_strdup();
+void    test_ft_strlen();
+void    test_ft_write();
+
+#endif

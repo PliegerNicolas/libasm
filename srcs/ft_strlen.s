@@ -7,16 +7,16 @@ global ft_strlen                    ; entry-point for linker.
         ;   rax - Length of the string excluding null terminator.
 
         ; Initialize counter
-        xor rax, rax                ; Initialize return value to 0 through XOR operation,
+        xor     rax, rax            ; Initialize return value to 0 through XOR operation,
                                     ;   who is sometimes more efficient than mov.
 
     .loop:                          ; Loop through string.
-        cmp byte [rdi], 0           ; Dereference and compare the first 
+        movzx   rcx, byte [rdi + rax]
+        test    rcx, rcx            ; Dereference and compare the first 
                                     ;   rdi byte with null terminator.
-        je .end                     ; Jump if equal to null terminator -> exit the loop.
-        inc rax                     ; Increment counter.
-        inc rdi                     ; Increment pointer to move to next character.
-        jmp .loop                   ; Jump back to the start of the loop.
+        jz      .end
+        add     rax, 1
+        jmp     .loop
     
     .end:
         ret                         ; Return length stored in rax (default).

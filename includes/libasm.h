@@ -14,7 +14,6 @@
 # define LIBASM_H
 
 # include <errno.h>
-# include <time.h>
 
 # include <unistd.h>
 # include <fcntl.h>

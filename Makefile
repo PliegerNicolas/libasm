@@ -63,6 +63,12 @@ ASM_SOURCES					:=				$(addsuffix $(ASM_EXTENSION), $(SORTED_ASM_SOURCES_NAMES))
 #* CC SOURCES *#
 
 CC_SOURCES_NAMES			:=				tester/main \
+											tester/ft_read_test \
+											tester/ft_strcmp_test \
+											tester/ft_strcpy_test \
+											tester/ft_strdup_test \
+											tester/ft_strlen_test \
+											tester/ft_write_test \
 
 SORTED_CC_SOURCES_NAMES		:=				$(sort $(CC_SOURCES_NAMES))
 CC_SOURCES					:=				$(addsuffix $(CC_EXTENSION), $(SORTED_CC_SOURCES_NAMES))
@@ -74,8 +80,8 @@ CC_OBJECTS					:=				$(addprefix $(OBJECTS_PATH)/, $(CC_SOURCES:$(CC_EXTENSION)=
 
 #* CC HEADERS *#
 
-HEADERS_PATH		:=		./includes
-INCLUDE_FLAGS		:=		$(addprefix -I , $(HEADERS_PATH))
+HEADERS_PATH				:=				./includes
+INCLUDE_FLAGS				:=				$(addprefix -I , $(HEADERS_PATH))
 
 #* CC DEPENDENCIES *#
 
