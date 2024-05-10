@@ -39,6 +39,8 @@ void	test_strlen()
 	printf("Test_strlen nº4: No output here. Causes segfault as expected (UB)\n");
 	//printf("%sExpecting: %ld\n%s", EXPECTED_COLOR, strlen(str), RESET_COLOR);
 	//printf("%sResult: %ld\n%s", TEST_COLOR, ft_strlen(str), RESET_COLOR);
+
+	printf("\n");
 }
 
 void	test_write()
@@ -134,6 +136,8 @@ void	test_write()
 	//(void)write(fd, "Output: ", 8);
 	//o = ft_write(fd, str, strlen(str));
 	//printf("%sResult: %ld, %s%s\n", TEST_COLOR, o, strerror(errno), RESET_COLOR);
+
+	printf("\n");
 }
 
 void	test_read()
@@ -190,6 +194,8 @@ void	test_read()
 	close(fd_file2);
 	fd_file1 = 0;
 	fd_file2 = 0;
+
+	printf("\n");
 }
 
 void	test_strcmp()
@@ -227,18 +233,61 @@ void	test_strcmp()
 	//printf("Test_strcmp nº5: str1: '%s' with str2: '%s'\n", str1, str2);
 	//printf("%sExpecting: %d%s\n", EXPECTED_COLOR, strcmp(str1, str2), RESET_COLOR);
 	//printf("%sResult: %d%s\n", TEST_COLOR, ft_strcmp(str1, str2), RESET_COLOR);
+
+	printf("\n");
 }
+
+void	test_strcpy()
+{
+	char	str1[20] = { 0 };
+	char	*str2 = NULL;
+
+	str2 = "Ouistiti";
+	printf("Test_strcpy nº1: str1: '%s' with str2: '%s'\n", str1, str2);
+	printf("%sExpecting: '%s'%s\n", EXPECTED_COLOR, strcpy(str1, str2), RESET_COLOR);
+	printf("%sResult: '%s'%s\n", TEST_COLOR, ft_strcpy(str1, str2), RESET_COLOR);
+
+	printf("\n");
+}
+
+ void	test_strcpy_speed()
+ {
+	struct timespec	start_time, end_time;
+	double elapsed_time = 0.0;
+	double total_elapsed_time = 0.00;
+
+	char		dest[50];
+	const char	*src = "Une banane qui roule par terre.";
+
+	bzero(dest, sizeof(dest));
+
+	// Warmup
+	for (int i = 0; i < 100; ++i)
+		ft_strcpy(dest, src);
+
+	for (int i = 0; i < 500; ++i)
+	{
+		clock_gettime(CLOCK_MONOTONIC, &start_time);
+		ft_strcpy(dest, src);
+		clock_gettime(CLOCK_MONOTONIC, &end_time);
+		elapsed_time = (end_time.tv_sec - start_time.tv_sec) * 1000.0 + (end_time.tv_nsec - start_time.tv_nsec) / 1000000.0;
+		total_elapsed_time += elapsed_time;
+	}
+
+	double	average_elapsed_time = total_elapsed_time / 500;
+	printf("Average elapsed time: %f ms\n", average_elapsed_time);
+	printf("Dest: %s\n", dest);
+
+	printf("\n");
+ }
 
 int	main(void)
 {
 	test_strlen();
-	printf("\n");
 	test_write();
-	printf("\n");
 	test_read();
-	printf("\n");
 	test_strcmp();
-	printf("\n");
+	test_strcpy();
 
 	return (0);
 }
