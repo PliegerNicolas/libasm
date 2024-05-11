@@ -7,10 +7,10 @@ static void    test_speed(const char *s1, const char *s2, int (*f)(const char *,
 	double	elapsed_time, average_elapsed_time;
 	double	total_elapsed_time = 0.00;
 
-	for (int i = 0; i < 500; ++i)
+	for (int i = 0; i < 100; ++i)
 		f(s1, s2);
 
-	for (int i = 0; i < 1000; ++i)
+	for (int i = 0; i < 5000; ++i)
 	{
 		clock_gettime(CLOCK_MONOTONIC, &start_time);
 		f(s1, s2);

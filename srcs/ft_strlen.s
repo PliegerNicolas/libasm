@@ -22,8 +22,12 @@ global ft_strlen                    ; entry-point for linker.
         tzcnt       ecx, ecx            ; Count 0 from LSB to MSB.
         add         rax, rcx            ; Add ECX (through RCX) to RAX
 
-        test        rcx, rcx            ; Test if RCX is 0 (first byte is zero) or RAX a multiple of 16.
-        jz          .end
+        test        rcx, rcx            ; Check if rcx is set to 0.
+        jz          .end                ; If set to 0, jump to .end
+        test        rcx, 0xF            ; Check if rcx is a multiple of 16. If any of the bits are set outside of the low-order 4 bits
+                                        ;    result will be not zero.
+        jnz         .end                ; If result is not zero, jump to .end
+
 
         add         rdi, 16             ; Move RDI 16 bytes forward for next loop.
         jmp         .loop               ; Jump unconditionally to .loop

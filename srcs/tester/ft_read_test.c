@@ -14,14 +14,14 @@ static void    test_speed(ssize_t (*f)(int, void *, size_t))
     fd = open("Makefile", O_RDONLY);
     if (fd == -1) return ;
 
-	for (int i = 0; i < 500; ++i)
+	for (int i = 0; i < 1000; ++i)
 		f(fd, buffer, sizeof(buffer) - 1);
 
     close(fd);
     fd = open("Makefile", O_RDONLY);
     if (fd == -1) return ;
 
-	for (int i = 0; i < 1000; ++i)
+	for (int i = 0; i < 5000; ++i)
 	{
 		clock_gettime(CLOCK_MONOTONIC, &start_time);
 		f(fd, buffer, sizeof(buffer) - 1);

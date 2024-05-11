@@ -7,10 +7,10 @@ static void    test_speed(const char *s, size_t (*f)(const char *))
 	double	elapsed_time, average_elapsed_time;
 	double	total_elapsed_time = 0.00;
 
-	for (int i = 0; i < 500; ++i)
+	for (int i = 0; i < 100; ++i)
 		f(s);
 
-	for (int i = 0; i < 1000; ++i)
+	for (int i = 0; i < 5000; ++i)
 	{
 		clock_gettime(CLOCK_MONOTONIC, &start_time);
 		f(s);
@@ -29,9 +29,6 @@ void    test_ft_strlen()
 
 	test_speed("Skrattar du, förlorar du, mannen !", strlen);
 	test_speed("Skrattar du, förlorar du, mannen !", ft_strlen);
-
-	printf("%ld\n", strlen("aaaaaaaaaaaaaaaa"));
-	printf("%ld\n", ft_strlen("aaaaaaaaaaaaaaaa"));
 
 	printf("\n");
 }
