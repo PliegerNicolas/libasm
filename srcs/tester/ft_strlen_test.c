@@ -30,5 +30,20 @@ void    test_ft_strlen()
 	test_speed("Skrattar du, förlorar du, mannen !", strlen);
 	test_speed("Skrattar du, förlorar du, mannen !", ft_strlen);
 
+	printf("%ld\n", strlen("Skrattar du, förlorar du, mannen !"));
+	printf("%ld\n", ft_strlen("Skrattar du, förlorar du, mannen !"));
+
+	printf("%ld\n", strlen("oinvdasnoviasdnvasooiv"));
+	printf("%ld\n", ft_strlen("oinvdasnoviasdnvasooiv"));
+
+	printf("%ld\n", strlen("422"));
+	printf("%ld\n", ft_strlen("422"));
+
+	printf("%ld\n", strlen(""));
+	printf("%ld\n", ft_strlen(""));
+
+	printf("%ld\n", strlen("asdgiasdgoinoivasndccoinasodgewtpqowoeptjdaslnvagoisdut90342hiewfaosifdo"));
+	printf("%ld\n", ft_strlen("asdgiasdgoinoivasndccoinasodgewtpqowoeptjdaslnvagoisdut90342hiewfaosifdo"));
+
 	printf("\n");
 }
