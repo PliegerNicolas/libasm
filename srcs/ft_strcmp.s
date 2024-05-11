@@ -7,27 +7,49 @@ global ft_strcmp                            ; Entry-point for linker.
         ; Returns:
         ;   rax - An negative integer is s1 is less than s2. 0 if equal. A positive integer if s1 is more than s2.
 
-        xor rax, rax                        ; Initialize return value to 0 through XOR operation,
-                                            ;   who is sometimes more efficient than mov.
-        xor rcx, rcx                        ; Initialize rcx counter to 0 via XOR operation.
-                                            ;   It will be used as a common incrementor.
+    .initialize:
+        xor         rbx, rbx            ; Set RBX to 0 through XOR operation. Used as common index for strings.
+        xor         rcx, rcx            ; Set RDX to 0 through XOR operation. Used as storage for null byte index.
+        xor         rdx, rdx            ; Set RCX to 0 through XOR operation. Used as storage for discrepent character index.
 
-                                            ; rdi is set through variable (s1). 64-bit.
-                                            ; rsi is set through variable (s2). 64-bit.
+        pxor        xmm2, xmm2          ; Set XMM2 to 0 through XOR operation.
+        pxor        xmm3, xmm3          ; Set XMM3 to 0 through XOR operation.
+
+    .load_data:
+        movdqu      xmm0, [rdi + rbx]   ; Copy in XMM0 the next 16 bytes (128 bits) of RDI.
+        movdqu      xmm1, [rsi + rbx]   ; Copy in XMM1 the next 16 bytes (128 bits) of RSI.
+
+    .find_next_null_byte:
+        pxor        xmm2, xmm2          ; Set XMM2 to 0 through XOR operation.
+        pxor        xmm3, xmm3          ; Set XMM3 to 0 through XOR operation.
+        pcmpeqb     xmm2, xmm0          ; Compare byte/byte XMM0 and XMM2. Common values are set to 0xFF, else 0x00.
+        pcmpeqb     xmm3, xmm1          ; Compare byte/byte XMM1 and XMM3. Common values are set to 0xFF, else 0x00.
+        pandn       xmm2, xmm3
+        pmovmskb    ecx, xmm3           ; Assign the MSB of each byte of XMM2 to the lower 16 bits of ECX.
+        or          ecx, 0xFFFF0000     ; Set 16 most significant bits of ECX to 1 so maximum value of bsf is 16 due
+                                        ;   to ECX size being 32 bits.
+        bsf         ecx, ecx            ; Get index of first set bit (found 0).
+
+    .find_next_discrepancy:
+        movdqu      xmm3, xmm0          ; Copy XMM0 in XMM3.
+        pcmpeqb     xmm3, xmm1          ; Compare byte/byte XMM1 and XMM3. Common values are set to 0xFF, else 0x00.
+        pmovmskb    edx, xmm3           ; Store MSB of XMM3 in ECX's 16 lowest bits.
+        not         edx                 ; invert ECX's bits.
+        bsf         edx, edx            ; Find the index of the first set bit.
+
+    .check_indexes:
+        cmp         edx, ecx            ; Compare EDX with ECX.
+        cmovl       ecx, edx            ; If EDX is less than ECX, move EDX to ECX.
+        cmp         ecx, 16             ; Check if ECX is smaller than 16 (no discrepency or null byte found).
+        jl          .end                ; If both indexes are not set to 0, jump to .calculate_difference.
 
     .loop:
-        mov al, [rdi + rcx]                 ; Store the character into a 8-bit register (al)
-        mov bl, [rsi + rcx]                 ; Store the character into a 8-bit register (bl)
-        cmp al, bl                          ; Compare the first characters of rdi and rsi, stored in al and bl.
-        jne .end                            ; If not equal, jump to .end.
-        cmp al, 0                           ; Verify if rdi's current (al) character is 0 (null byte).
-                                            ;   We check if al and bl are equal so it technically also tests bl.
-        je .end                             ; If equal, jump to end.
-        inc rcx                             ; Increment the common incrementor value (rdi++ & rsi++)
-        jmp .loop                           ; Jump to .loop unconditionaly
+        add         rbx, 16             ; Increment RBX by 16 bytes to move forward with the strings.
+        jmp         .load_data          ; Jump to load_data and restart the loop.
 
-     .end:
-        sub al, bl                          ; Substitute bl from al.
-        movsx   rax, al                     ; Move with sign extension 'padding'. It moves from a smaller to a bigger
-                                            ;   register (8-bit to 64-bit) without altering the original value or it's sign.
-        ret                                 ; Return length stored in rax (default).
+    .end:
+        add         rbx, rcx            ; Add up RBX and RCX to get index of characters to compare.
+        movzx       rax, byte [rdi + rbx]
+        movzx       rcx, byte [rsi + rbx]
+        sub         rax, rcx
+        ret

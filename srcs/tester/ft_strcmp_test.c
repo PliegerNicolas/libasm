@@ -27,8 +27,12 @@ void    test_ft_strcmp()
 {
     printf("%sTest_ft_strcmp%s\n", YELLOW, RESET_COLOR);
 
-    test_speed("Skrattar du, förlorar du, mannen !", "abc", strcmp);
-    test_speed("Skrattar du, förlorar du, mannen !", "abc", ft_strcmp);
+	(void)test_speed;
+    //test_speed("Skrattar du, förlorar du, mannen !", "abc", strcmp);
+    //test_speed("Skrattar du, förlorar du, mannen !", "abc", ft_strcmp);
+
+	printf("%d\n", strcmp("aaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaa"));
+	printf("%d\n", ft_strcmp("aaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaa"));
 
     printf("\n");
 }
