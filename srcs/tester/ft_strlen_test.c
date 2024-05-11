@@ -25,10 +25,13 @@ static void    test_speed(const char *s, size_t (*f)(const char *))
 
 void    test_ft_strlen()
 {
-    printf("%sTest_ft_strlen%s\n", YELLOW, RESET_COLOR);
+	printf("%sTest_ft_strlen%s\n", YELLOW, RESET_COLOR);
 
-    test_speed("Skrattar du, förlorar du, mannen !", strlen);
-    test_speed("Skrattar du, förlorar du, mannen !", ft_strlen);
+	test_speed("Skrattar du, förlorar du, mannen !", strlen);
+	test_speed("Skrattar du, förlorar du, mannen !", ft_strlen);
 
-    printf("\n");
+	printf("%ld\n", strlen("aaaaaaaaaaaaaaaa"));
+	printf("%ld\n", ft_strlen("aaaaaaaaaaaaaaaa"));
+
+	printf("\n");
 }

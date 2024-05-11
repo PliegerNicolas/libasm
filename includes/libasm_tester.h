@@ -18,6 +18,7 @@
 # define RESET_COLOR "\x1b[0m"
 
 # include <time.h>
+# include <bits/time.h>
 
 void    test_ft_read();
 void    test_ft_strcmp();
