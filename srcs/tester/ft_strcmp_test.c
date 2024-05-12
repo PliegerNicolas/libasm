@@ -7,7 +7,7 @@ static void    ft_test_speed(const char *s1, const char *s2, int (*f)(const char
 	double	elapsed_time, average_elapsed_time;
 	double	total_elapsed_time = 0.00;
 
-	for (int i = 0; i < 100; ++i)
+	for (int i = 0; i < 500; ++i)
 		f(s1, s2);
 
 	for (int i = 0; i < 5000; ++i)
@@ -27,8 +27,8 @@ static void	test_empty_equal_strings()
 {
 	printf("%sTest_empty_equal_strings%s\n", GREEN, RESET_COLOR);
 
-	printf("%d | ", strcmp("", ""));
-	printf("%d\n", ft_strcmp("", ""));
+	printf("%d | ", strcmp("", ""));										// 0
+	printf("%d\n", ft_strcmp("", ""));										// 0
 }
 
 static void	test_charlimits_equal_strings()
@@ -37,16 +37,16 @@ static void	test_charlimits_equal_strings()
 	printf("%sTest_charlimits_equal_strings%s\n", GREEN, RESET_COLOR);
 
 	// 15 chars
-	printf("%d | ", strcmp("abcdefghijklmn", "abcdefghijklmn"));
-	printf("%d\n", ft_strcmp("abcdefghijklmn", "abcdefghijklmn"));
+	printf("%d | ", strcmp("abcdefghijklmn", "abcdefghijklmn"));			// 15
+	printf("%d\n", ft_strcmp("abcdefghijklmn", "abcdefghijklmn"));			// 15
 
 	// 16 chars
-	printf("%d | ", strcmp("abcdefghijklmno", "abcdefghijklmno"));
-	printf("%d\n", ft_strcmp("abcdefghijklmno", "abcdefghijklmno"));
+	printf("%d | ", strcmp("abcdefghijklmno", "abcdefghijklmno"));			// 16
+	printf("%d\n", ft_strcmp("abcdefghijklmno", "abcdefghijklmno"));		// 16
 
 	// 17 chars
-	printf("%d | ", strcmp("abcdefghijklmnop", "abcdefghijklmnop"));
-	printf("%d\n", ft_strcmp("abcdefghijklmnop", "abcdefghijklmnop"));
+	printf("%d | ", strcmp("abcdefghijklmnop", "abcdefghijklmnop"));		// 16 + 1
+	printf("%d\n", ft_strcmp("abcdefghijklmnop", "abcdefghijklmnop"));		// 16 + 1
 }
 
 static void	test_charlimits_unequal_strings()
@@ -55,33 +55,37 @@ static void	test_charlimits_unequal_strings()
 	printf("%sTest_charlimits_unequal_strings%s\n", GREEN, RESET_COLOR);
 
 	// 15 chars
-	printf("%d | ", strcmp("abcdefghijklmn", "abcdefghijklma"));
-	printf("%d\n", ft_strcmp("abcdefghijklmn", "abcdefghijklma"));
+	printf("%d | ", strcmp("abcdefghijklmn", "abcdefghijklma"));			// 14
+	printf("%d\n", ft_strcmp("abcdefghijklmn", "abcdefghijklma"));			// 14
 
 	// 16 chars
-	printf("%d | ", strcmp("abcdefghijklmno", "abcdefghijklmna"));
-	printf("%d\n", ft_strcmp("abcdefghijklmno", "abcdefghijklmna"));
+	printf("%d | ", strcmp("abcdefghijklmno", "abcdefghijklmna"));			// 15
+	printf("%d\n", ft_strcmp("abcdefghijklmno", "abcdefghijklmna"));		// 15
 
 	// 17 chars
-	printf("%d | ", strcmp("abcdefghijklmnop", "abcdefghijklmnoa"));
-	printf("%d\n", ft_strcmp("abcdefghijklmnop", "abcdefghijklmnoa"));
+	printf("%d | ", strcmp("abcdefghijklmnop", "abcdefghijklmnoa"));		// 16
+	printf("%d\n", ft_strcmp("abcdefghijklmnop", "abcdefghijklmnoa"));		// 16
+
+	// 19 chars
+	printf("%d | ", strcmp("abcdefghijklmnopqr", "abcdefghijklmnopqa"));	// 16 + 1
+	printf("%d\n", ft_strcmp("abcdefghijklmnopqr", "abcdefghijklmnopqa"));	// 16 + 1
 }
 
 static void	test_diff_size_unequal_strings()
 {
 	printf("%sTest_diff_Size_unequal_strings%s\n", GREEN, RESET_COLOR);
 
-	printf("%d | ", strcmp("Hello, world!", "Hello!"));
-	printf("%d\n", ft_strcmp("Hello, world!", "Hello!"));
+	printf("%d | ", strcmp("Hello, world!", "Hello!"));						// 6
+	printf("%d\n", ft_strcmp("Hello, world!", "Hello!"));					// 6
 
-	printf("%d | ", strcmp("Hello!", "Hello, world!"));
-	printf("%d\n", ft_strcmp("Hello!", "Hello, world!"));
+	printf("%d | ", strcmp("Hello!", "Hello, world!"));						// 6
+	printf("%d\n", ft_strcmp("Hello!", "Hello, world!"));					// 6
 
-	printf("%d | ", strcmp("Hello, woooooooooooooooooooooorld!", "Yo dude..."));
-	printf("%d\n", ft_strcmp("Hello, woooooooooooooooooooooorld!", "Yo dude..."));
+	printf("%d | ", strcmp("Hello, woooooooooooooooooooooorld!", "Yo dude..."));	// 0
+	printf("%d\n", ft_strcmp("Hello, woooooooooooooooooooooorld!", "Yo dude..."));	// 0
 
-	printf("%d | ", strcmp("Yo dude...", "Hello, woooooooooooooooooooooorld!"));
-	printf("%d\n", ft_strcmp("Yo dude...", "Hello, woooooooooooooooooooooorld!"));
+	printf("%d | ", strcmp("Yo dude...", "Hello, woooooooooooooooooooooorld!"));	// 0
+	printf("%d\n", ft_strcmp("Yo dude...", "Hello, woooooooooooooooooooooorld!"));	// 0
 }
 
 static void	test_non_ascii_chars()

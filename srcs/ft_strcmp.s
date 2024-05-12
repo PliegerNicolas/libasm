@@ -9,12 +9,12 @@ global ft_strcmp                            ; Entry-point for linker.
         ;   rax - An negative integer is s1 is less than s2. 0 if equal. A positive integer if s1 is more than s2.
 
     .initialize:
-        xor         rbx, rbx                            ; Set RBX to 0 through XOR operation. Common string reading index.
+        xor         rax, rax                            ; Set RAX to 0 through XOR operation. Common string reading index and return value.
         xor         rcx, rcx                            ; Set RCX to 0 through XOR operation. Temporary storage for discrepency index.
 
     .loop:
-        movdqu      xmm0, [rdi + rbx]                   ; Store 16bytes (128bits) of RDI in XMM0. RBX is offset.
-        movdqu      xmm1, [rsi + rbx]                   ; Store 16bytes (128bits) of RSI in XMM1. RBX is offset.
+        movdqu      xmm0, [rdi + rax]                   ; Store 16bytes (128bits) of RDI in XMM0. RAX is offset.
+        movdqu      xmm1, [rsi + rax]                   ; Store 16bytes (128bits) of RSI in XMM1. RAX is offset.
         movdqu      xmm2, xmm0                          ; Copy XMM0 in XMM2.
         movdqu      xmm3, xmm1                          ; Copy XMM1 in XMM3.
         pxor        xmm4, xmm4                          ; Set XMM4 to 0 through XOR operation.
@@ -42,14 +42,14 @@ global ft_strcmp                            ; Entry-point for linker.
         not         ecx                                 ; Invert ECX's bits for usage with BSF.
         bsf         ecx, ecx                            ; Bit scan ECX forward until 1 is found. This retrieve the index on the 16 bytes of the discrepent character.
 
-        add         rbx, rcx                            ; Add ECX (through RCX) to RGB.
+        add         rax, rcx                            ; Add ECX (through RCX) to RGB.
         cmp         ecx, 16                             ; Compare ECX to 16.
         je          .loop                               ; Jump to .loop if equal.
 
     .calc_output:
-        movzx       rax, byte [rdi + rbx]               ; Set in RAX target byte's value, padded with 0s.
-        movzx       rbx, byte [rsi + rbx]               ; Set in RBX target byte's value, padded with 0s.
-        sub         rax, rbx                            ; Substitute RAX with RBX.
+        movzx       rcx, byte [rsi + rax]               ; Set in RCX target byte's value, padded with 0s.
+        movzx       rax, byte [rdi + rax]               ; Set in RAX target byte's value, padded with 0s.
+        sub         rax, rcx                            ; Substitute RAX with RCX.
 
     .normalize_output:
         test        rax, rax                            ; Check if RAX is 0.
@@ -60,3 +60,5 @@ global ft_strcmp                            ; Entry-point for linker.
 
     .end:
         ret                                             ; Return RAX.
+
+; Should check out the pcmpistri instruction. Couldn't figure out a way to make it work exacly how I want it to.
