@@ -9,47 +9,43 @@ global ft_strcmp                            ; Entry-point for linker.
         ;   rax - An negative integer is s1 is less than s2. 0 if equal. A positive integer if s1 is more than s2.
 
     .initialize:
-        xor         rbx, rbx            ; Set RBX to 0 through XOR operation. Used as common index for strings.
-        xor         rdx, rdx            ; Set RCX to 0 through XOR operation. Used as storage for discrepent character index.
-
-    .load_data:
-        movdqu      xmm0, [rdi + rbx]   ; Copy in XMM0 the next 16 bytes (128 bits) of RDI.
-        movdqu      xmm1, [rsi + rbx]   ; Copy in XMM1 the next 16 bytes (128 bits) of RSI.
-
-    .find_next_null_byte:
-        pxor        xmm2, xmm2              ; Set XMM2 to 0 through XOR operation.
-        pxor        xmm3, xmm3              ; Set XMM3 to 0 through XOR operation.
-        pcmpeqb     xmm2, xmm0              ; Compare byte/byte XMM0 and XMM2. Common values are set to 0xFF, else 0x00.
-        pcmpeqb     xmm3, xmm1              ; Compare byte/byte XMM1 and XMM3. Common values are set to 0xFF, else 0x00.
-        pandn       xmm2, xmm3
-        pmovmskb    ecx, xmm3               ; Assign the MSB of each byte of XMM2 to the lower 16 bits of ECX.
-        or          ecx, 0xFFFF0000         ; Set 16 most significant bits of ECX to 1 so maximum value of bsf is 16 due
-                                            ;   to ECX size being 32 bits.
-        bsf         ecx, ecx                ; Get index of first set bit (found 0).
-
-    .find_next_discrepancy:
-        movdqu      xmm3, xmm0              ; Copy XMM0 in XMM3.
-        pcmpeqb     xmm3, xmm1              ; Compare byte/byte XMM1 and XMM3. Common values are set to 0xFF, else 0x00.
-        pmovmskb    edx, xmm3               ; Store MSB of XMM3 in ECX's 16 lowest bits.
-        not         edx                     ; invert ECX's bits.
-        bsf         edx, edx                ; Find the index of the first set bit.
-
-    .find_smallest_index:
-        cmp         edx, ecx                ; Compare EDX with ECX.
-        jge         .check_indexes          ; If EDX is less than ECX, move EDX to ECX.
-        mov         rcx, rdx                ; Copy RDX as it is the smallest value to RCX.
-
-    .check_indexes:
-        cmp         ecx, 16                 ; Check if ECX is smaller than 16 (no discrepency or null byte found).
-        jl          .end                    ; If both indexes are not set to 0, jump to .calculate_difference.
+        xor         rbx, rbx                            ; Set RBX to 0 through XOR operation. Common string reading index.
+        xor         rcx, rcx                            ; Set RCX to 0 through XOR operation. Temporary storage for discrepency index.
 
     .loop:
-        add         rbx, 16                 ; Increment RBX by 16 bytes to move forward with the strings.
-        jmp         .load_data              ; Jump to load_data and restart the loop.
+        movdqu      xmm0, [rdi + rbx]                   ; Store 16bytes (128bits) of RDI in XMM0. RBX is offset.
+        movdqu      xmm1, [rsi + rbx]                   ; Store 16bytes (128bits) of RSI in XMM1. RBX is offset.
+        movdqu      xmm2, xmm0                          ; Copy XMM0 in XMM2.
+        movdqu      xmm3, xmm1                          ; Copy XMM1 in XMM3.
+        pxor        xmm4, xmm4                          ; Set XMM4 to 0 through XOR operation.
+
+        pcmpeqb     xmm0, xmm1                          ; Compare byte/byte XMM0 with XMM2. Common values are set to 0xFF (1), else 0x00 (0).
+                                                        ;   XMM0 now contains position of common bytes (as 1/0xFF) between XMM0 and XMM1.
+
+        pcmpeqb     xmm2, xmm4                          ; Compare byte/byte XMM2 (XMM0's copy) with XMM4 (null). Common values are set to 0xFF (1), else 0x00 (0).
+                                                        ;   XMM2 now contains positions of XMM0's null bytes (as 1/0xFF).
+        pcmpeqb     xmm3, xmm4                          ; Compare byte/byte XMM3 (XMM1's copy) with XMM4 (null). Common values are set to 0xFF (1), else 0x00 (0).
+                                                        ;   XMM3 now contains positions of XMM0's null bytes (as 1/0xFF).
+        por         xmm2, xmm3                          ; Sets 0xFF in common between XMM2 and XMM3 through OR operation.
+                                                        ;   XMM2 now contains the position of the null bytes of XMM0 and XMM1 (as 1/0xFF).
+        ; Execute XMM equivalent of NOT operation on XMM2.
+        pcmpeqb     xmm4, xmm4                          ; Fill XMM4 with 1 by comparison with itself (eq. XOR operation).
+        pxor        xmm2, xmm4                          ; Perform NOT operation through XOR on a XMM4 (1 filled XMM).
+                                                        ;   xmm2 now contains the position of the valid characters, excluding null bytes,
+                                                        ;   of XMM0 and XMM1 (as 1/0xFF).
+        pand        xmm0, xmm2                          ; AND operation on XMM0 and XMM2. Remove null bytes from XMM0.
+                                                        ;   XMM0 now contains the position of valid common bytes (as 1/0xFF) between original XMM0 and XMM1.
+
+        pmovmskb    ecx, xmm0                           ; Store per byte MSB of XMM0 in ECX's 16 lowest bits.
+        not         ecx                                 ; Invert ECX's bits for usage with BSF.
+        bsf         ecx, ecx                            ; Bit scan ECX forward until 1 is found. This retrieve the index on the 16 bytes of the discrepent character.
+
+        add         rbx, rcx                            ; Add ECX (through RCX) to RGB.
+        cmp         ecx, 16                             ; Compare ECX to 16.
+        je          .loop                               ; Jump to .loop if equal.
 
     .end:
-        add         rbx, rcx                ; Add up RBX and RCX to get index of characters to compare.
-        movzx       rax, byte [rdi + rbx]   ; Store in RAX the value of target RDI's byte/char.
-        movzx       rcx, byte [rsi + rbx]   ; Store in RBX the value of target RSI's byte/char.
-        sub         rax, rcx                ; Substitute RAX with RBX (s1's char with s2's char)
-        ret                                 ; Return RAX's value.
+        movzx       rax, byte [rdi + rbx]
+        movzx       rbx, byte [rsi + rbx]
+        sub         rax, rbx
+        ret
