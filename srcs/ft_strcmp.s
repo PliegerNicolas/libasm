@@ -44,8 +44,16 @@ global ft_strcmp                            ; Entry-point for linker.
         cmp         ecx, 16                             ; Compare ECX to 16.
         je          .loop                               ; Jump to .loop if equal.
 
-    .end:
+    .calc_output:
         movzx       rax, byte [rdi + rbx]
         movzx       rbx, byte [rsi + rbx]
         sub         rax, rbx
+
+        test        rax, rax
+        jz          .end
+        mov         rax, 1
+        jns         .end
+        neg         rax
+
+    .end:
         ret
