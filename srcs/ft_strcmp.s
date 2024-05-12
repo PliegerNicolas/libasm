@@ -9,11 +9,7 @@ global ft_strcmp                            ; Entry-point for linker.
 
     .initialize:
         xor         rbx, rbx            ; Set RBX to 0 through XOR operation. Used as common index for strings.
-        xor         rcx, rcx            ; Set RDX to 0 through XOR operation. Used as storage for null byte index.
         xor         rdx, rdx            ; Set RCX to 0 through XOR operation. Used as storage for discrepent character index.
-
-        pxor        xmm2, xmm2          ; Set XMM2 to 0 through XOR operation.
-        pxor        xmm3, xmm3          ; Set XMM3 to 0 through XOR operation.
 
     .load_data:
         movdqu      xmm0, [rdi + rbx]   ; Copy in XMM0 the next 16 bytes (128 bits) of RDI.
@@ -37,9 +33,12 @@ global ft_strcmp                            ; Entry-point for linker.
         not         edx                     ; invert ECX's bits.
         bsf         edx, edx                ; Find the index of the first set bit.
 
-    .check_indexes:
+    .find_smallest_index:
         cmp         edx, ecx                ; Compare EDX with ECX.
-        cmovl       ecx, edx                ; If EDX is less than ECX, move EDX to ECX.
+        jge         .check_indexes          ; If EDX is less than ECX, move EDX to ECX.
+        mov         rcx, rdx                ; Copy RDX as it is the smallest value to RCX.
+
+    .check_indexes:
         cmp         ecx, 16                 ; Check if ECX is smaller than 16 (no discrepency or null byte found).
         jl          .end                    ; If both indexes are not set to 0, jump to .calculate_difference.
 
