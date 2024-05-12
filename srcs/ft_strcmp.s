@@ -1,3 +1,4 @@
+align 16
 global ft_strcmp                            ; Entry-point for linker.
 
     ft_strcmp:

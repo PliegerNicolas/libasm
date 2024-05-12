@@ -1,3 +1,4 @@
+align 16
 global ft_strlen                    ; entry-point for linker.
 
     ft_strlen:
