@@ -34,3 +34,5 @@ global ft_strcpy                            ; Entry-point for linker.
 
     .end:
         ret
+
+; Using qword for bulk data copying. Could use SSE. Easy to implement. This is slower than the origian strcpy the longer the strings are.
