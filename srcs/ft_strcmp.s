@@ -45,16 +45,16 @@ global ft_strcmp                            ; Entry-point for linker.
         je          .loop                               ; Jump to .loop if equal.
 
     .calc_output:
-        movzx       rax, byte [rdi + rbx]
-        movzx       rbx, byte [rsi + rbx]
-        sub         rax, rbx
+        movzx       rax, byte [rdi + rbx]               ; Set in RAX target byte's value, padded with 0s.
+        movzx       rbx, byte [rsi + rbx]               ; Set in RBX target byte's value, padded with 0s.
+        sub         rax, rbx                            ; Substitute RAX with RBX.
 
     .normalize_output:
-        test        rax, rax
-        jz          .end
-        mov         rax, 1
-        jns         .end
-        neg         rax
+        test        rax, rax                            ; Check if RAX is 0.
+        jz          .end                                ; If RAX is 0, jump to .end.
+        mov         rax, 1                              ; Set RAX to 1.
+        jns         .end                                ; If not signed, jump to .end
+        neg         rax                                 ; Negate RAX.
 
     .end:
-        ret
+        ret                                             ; Return RAX.
