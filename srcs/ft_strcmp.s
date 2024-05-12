@@ -19,20 +19,22 @@ global ft_strcmp                            ; Entry-point for linker.
         movdqu      xmm3, xmm1                          ; Copy XMM1 in XMM3.
         pxor        xmm4, xmm4                          ; Set XMM4 to 0 through XOR operation.
 
-        pcmpeqb     xmm0, xmm1                          ; Compare byte/byte XMM0 with XMM2. Common values are set to 0xFF (1), else 0x00 (0).
+        pcmpeqb     xmm0, xmm1                          ; Compare byte/byte XMM0 with XMM2. Common bytes are set to 0xFF (1), else 0x00 (0).
                                                         ;   XMM0 now contains position of common bytes (as 1/0xFF) between XMM0 and XMM1.
 
         pcmpeqb     xmm2, xmm4                          ; Compare byte/byte XMM2 (XMM0's copy) with XMM4 (null). Common values are set to 0xFF (1), else 0x00 (0).
                                                         ;   XMM2 now contains positions of XMM0's null bytes (as 1/0xFF).
         pcmpeqb     xmm3, xmm4                          ; Compare byte/byte XMM3 (XMM1's copy) with XMM4 (null). Common values are set to 0xFF (1), else 0x00 (0).
                                                         ;   XMM3 now contains positions of XMM0's null bytes (as 1/0xFF).
-        por         xmm2, xmm3                          ; Sets 0xFF in common between XMM2 and XMM3 through OR operation.
+        por         xmm2, xmm3                          ; Mix XMM2 and XMM3's 1/0xFF store them in XMM2 through OR operation.
                                                         ;   XMM2 now contains the position of the null bytes of XMM0 and XMM1 (as 1/0xFF).
+
         ; Execute XMM equivalent of NOT operation on XMM2.
-        pcmpeqb     xmm4, xmm4                          ; Fill XMM4 with 1 by comparison with itself (eq. XOR operation).
+        pcmpeqb     xmm4, xmm4                          ; Fill XMM4 with 1 by comparison with itself.
         pxor        xmm2, xmm4                          ; Perform NOT operation through XOR on a XMM4 (1 filled XMM).
                                                         ;   xmm2 now contains the position of the valid characters, excluding null bytes,
                                                         ;   of XMM0 and XMM1 (as 1/0xFF).
+
         pand        xmm0, xmm2                          ; AND operation on XMM0 and XMM2. Remove null bytes from XMM0.
                                                         ;   XMM0 now contains the position of valid common bytes (as 1/0xFF) between original XMM0 and XMM1.
 
