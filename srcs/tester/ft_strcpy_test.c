@@ -1,12 +1,16 @@
 #include "libasm.h"
 #include "libasm_tester.h"
 
-static void ft_test_speed(const char *s2, char *(*f)(char *, const char *))
+static void ft_test_speed(const char *s2, const size_t buffer_size, char *(*f)(char *, const char *))
 {
 	struct	timespec	start_time, end_time;
 	double				elapsed_time, average_elapsed_time;
 	double				total_elapsed_time = 0.00;
-	char				s1[2000] = { 0 };
+
+	char				*s1 = NULL;
+	s1 = malloc((buffer_size + 1) * sizeof(*s1));
+
+	bzero(s1, buffer_size);
 
 	for (int i = 0; i < 500; ++i)
 		f(s1, s2);
@@ -22,34 +26,41 @@ static void ft_test_speed(const char *s2, char *(*f)(char *, const char *))
 
 	average_elapsed_time = total_elapsed_time / 500;
 	printf("Average elapsed time: %f ms\n", average_elapsed_time);
+	free(s1);
 }
 
 static void	test_string_len_speed()
 {
+	char	*s = NULL;
 	printf("%stest_string_len_speed%s\n", GREEN, RESET_COLOR);
 
 	printf("%sempty%s\n", BLUE, RESET_COLOR);
-	ft_test_speed("", strcpy);
-	ft_test_speed("", ft_strcpy);
+	s = "";
+	ft_test_speed(s, strlen(s) + 1, strcpy);
+	ft_test_speed(s, strlen(s) + 1, ft_strcpy);
 
 	printf("%sshort%s\n", BLUE, RESET_COLOR);
-	ft_test_speed("Short", strcpy);
-	ft_test_speed("Short", ft_strcpy);
+	s = "Short";
+	ft_test_speed(s, strlen(s) + 1, strcpy);
+	ft_test_speed(s, strlen(s) + 1, ft_strcpy);
 
 	printf("%smedium%s\n", BLUE, RESET_COLOR);
-	ft_test_speed("A string longer than 16 chars.", strcpy);
-	ft_test_speed("A string longer than 16 chars.", ft_strcpy);
+	s = "A string longer than 16 chars.";
+	ft_test_speed(s, strlen(s) + 1, strcpy);
+	ft_test_speed(s, strlen(s) + 1, ft_strcpy);
 
 	printf("%slong%s\n", BLUE, RESET_COLOR);
-	ft_test_speed("A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string.", strcpy);
-	ft_test_speed("A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string.", ft_strcpy);
+	s = "A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string.";
+	ft_test_speed(s, strlen(s) + 1, strcpy);
+	ft_test_speed(s, strlen(s) + 1, ft_strcpy);
 
 	printf("%sreally long%s\n", BLUE, RESET_COLOR);
-	ft_test_speed("A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string.", ft_strcpy);
-	ft_test_speed("A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string.", ft_strcpy);
+	s = "A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string.";
+	ft_test_speed(s, strlen(s) + 1, strcpy);
+	ft_test_speed(s, strlen(s) + 1, ft_strcpy);
 }
 
-static void	copy_empty_to_empty()
+static void	test_copy_empty_to_empty()
 {
 	char		s1[1] = { 0 };
 	const char	*s2 = "";
@@ -60,7 +71,7 @@ static void	copy_empty_to_empty()
 	printf("%s\n", ft_strcpy(s1, s2));
 }
 
-static void	copy_limit_bytes()
+static void	test_copy_limit_bytes()
 {
 	char	s1[17] = { 0 };
 	char	*s2 = NULL;
@@ -83,13 +94,25 @@ static void	copy_limit_bytes()
 	printf("%s\n", ft_strcpy(s1, s2));
 }
 
+static void	test_copy_multi_null_byte()
+{
+	char	s1[10] = { 0 };
+	char	*s2 = "Multi\0null\0bytes\0used\0in\0string\0";
+
+	printf("%sTest_copy_limit_null_bytes%s\n", GREEN, RESET_COLOR);
+
+	printf("%s | ", strcpy(s1, s2));
+	printf("%s\n", ft_strcpy(s1, s2));
+}
+
 void test_ft_strcpy()
 {
  printf("%sTest_ft_strcpy%s\n", YELLOW, RESET_COLOR);
 
 	test_string_len_speed();
-	copy_empty_to_empty();
-	copy_limit_bytes();
+	test_copy_empty_to_empty();
+	test_copy_limit_bytes();
+	test_copy_multi_null_byte();
 
  printf("\n");
 }

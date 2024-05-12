@@ -34,4 +34,4 @@ global ft_strcpy                            ; Entry-point for linker.
         add         rbx, 16                 ; Increment RBX by 16.
         jmp         .ft_strcpy_loop         ; Jump unconditionaly to .ft_strcpy_loop.
 
-; The real strcpy is just a bit faster. The difference grows the bigger the string. Even with SMID instructions.
+; On short strings, the time is similar. On longer string the original seems faster even though is use SMID.
