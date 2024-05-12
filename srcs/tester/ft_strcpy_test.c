@@ -107,7 +107,7 @@ static void	test_copy_multi_null_byte()
 
 void test_ft_strcpy()
 {
- printf("%sTest_ft_strcpy%s\n", YELLOW, RESET_COLOR);
+	printf("%sTest_ft_strcpy%s\n", YELLOW, RESET_COLOR);
 
 	test_string_len_speed();
 	test_copy_empty_to_empty();
