@@ -49,6 +49,7 @@ global ft_strcmp                            ; Entry-point for linker.
         movzx       rbx, byte [rsi + rbx]
         sub         rax, rbx
 
+    .normalize_output:
         test        rax, rax
         jz          .end
         mov         rax, 1
