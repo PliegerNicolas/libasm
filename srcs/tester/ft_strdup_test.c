@@ -28,10 +28,11 @@ void    test_ft_strdup()
     printf("%sTest_ft_strdup%s\n", YELLOW, RESET_COLOR);
 
     (void)test_speed;
-	char	*s1 = "Banane.";
+	char	*s1 = "Une Banane rouge qui court dans l'herbe et mange de l'orange.";
 	char	*s2 = NULL;
 	s2 = ft_strdup(s1);
 	printf("%s | %s\n", s1, s2);
+	free(s2);
 
     printf("\n");
 }

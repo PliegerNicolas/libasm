@@ -9,7 +9,7 @@ extern  ft_strcpy
     ;   rsi (s2) - Source string. Should be null terminated.
     ; Returns:
     ;   rax - Pointer to the destination string (copy of original rdi).
-extern  _malloc
+extern  malloc
     ;
     ;
     ;
@@ -24,15 +24,26 @@ global  ft_strdup   ; Entry-point for linker.
         ; Returns:
         ;   rax - New pointer containing the same data as what' original RDI points to.
 
-        mov     rdx, rdi            ; Store RDI pointer to RDX. RDI will need to be modified for futur function calls.
+        push    rdi                 ; Push RDI onto the stack.
 
-        call    ft_strlen           ; Retrieve length of string (RDI).
-        inc     rax                 ; Increment by one byte to account for null byte.
+        ; ft_strlen: { args: [RDI contains ptr to str], ret: [RAX is undefined] }
+        call    ft_strlen           ; Call ft_strlen. Returns the length of the string, null byte excluded.
+        inc     rax                 ; Increment RAX by 1 to account for null byte.
 
-        mov     rdi, rax            ; Store RAX in RDI. RDI is set to the size to allocate in bytes for _malloc.
-        ;call    _malloc wrt ..plt   ; Allocate memory. New address is returned in RAX.
-        ;test    rax, rax            ; Verify if malloc succeeded. If equal to 0, exit.
-        ;jz      .end                ; If 0, jump to .end
+        ; malloc: { args: [RDI contains size in bytes to allocate], ret: [RAX is new ptr] }
+        mov     rdi, rax            ; Store size in bytes (RAX) for malloc in RDI.
+        call    malloc wrt ..plt    ; Call malloc. Allocates RDI bytes of memory and returns new ptr in RAX or 0x0 on fail.
+        test    rax, rax            ; Check if RAX is set to 0x0.
+        jz      .error              ; If 0, jump to .end
+
+        ; ft_strcpy: { args: [RDI contains ptr to dest str (to copy to), RSi contains ptr of source str (to copy from)], ret: [RAX is undefined] }
+        pop     rdi                 ; Restore RDI from stack.
+        mov     rsi, rdi            ; Move RDI to RSI.
+        mov     rdi, rax            ; Copy new ptr to RDI.
+        call    ft_strcpy
 
     .end:
+        ret
+
+    .error:
         ret

@@ -97,7 +97,7 @@ void    test_ft_strlen()
 	test_16bytes_nullterm_string();
 	test_17bytes_nullterm_string();
 	test_long_nullterm_string();
-	test_non_nullterm_string();
+	(void)test_non_nullterm_string;	// This makes valgrind unhappy. Kinda expected.
 
 	printf("\n");
 }
