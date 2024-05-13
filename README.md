@@ -25,6 +25,7 @@ I'm using Ubuntu (linux) with a 86x 64 bit processor and 42 School student compu
 - English assembly tutorial: https://www.tutorialspoint.com/assembly_programming/index.htm
 - French assembly tutorial: https://lacl.u-pec.fr/tan/asm.pdf
 - syscall table for x86-60: https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64
+- standard calling convention: https://en.wikipedia.org/wiki/X86_calling_conventions
 
 - 42docs: https://harm-smits.github.io/42docs/projects/libasm
 - Student tutorial: https://gaultier.github.io/blog/x11_x64.html
