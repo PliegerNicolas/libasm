@@ -23,9 +23,9 @@ static void    ft_test_speed(const char *s, size_t (*f)(const char *))
 	printf("Average elapsed time: %f ms\n", average_elapsed_time);
 }
 
-static void	test_speed()
+static void	test_speed_comparisons()
 {
-	printf("%sTest_speed%s\n", GREEN, RESET_COLOR);
+	printf("%sTest_speed_comparisons%s\n", GREEN, RESET_COLOR);
 
 	ft_test_speed("Skrattar du, förlorar du, mannen !", strlen);
 	ft_test_speed("Skrattar du, förlorar du, mannen !", ft_strlen);
@@ -91,7 +91,7 @@ void    test_ft_strlen()
 {
 	printf("%sTest_ft_strlen%s\n", YELLOW, RESET_COLOR);
 
-	test_speed();
+	test_speed_comparisons();
 	test_empty_string();
 	test_lessthan16bytes_nullterm_string();
 	test_16bytes_nullterm_string();

@@ -29,9 +29,11 @@ static void    ft_test_speed(const char *s2, char *(*f)(char *, const char *))
 	printf("Average elapsed time: %f ms\n", average_elapsed_time);
 }
 
-static void	speed_test_comparisons()
+static void	test_speed_comparisons()
 {
 	char	*s = NULL;
+
+	printf("%sTest_speed_comparisons%s\n", GREEN, RESET_COLOR);
 
 	printf("%sEmpty%s\n", BLUE, RESET_COLOR);
 	s = "";
@@ -155,11 +157,24 @@ static void	test_256bytes_string()
 	printf("%s\n", ft_strcpy(s1, s2));
 }
 
+static void	test_null_string()
+{
+	char	s1[256];
+	char	*s2 = NULL;
+	
+	printf("%sTest_null_string%s\n", GREEN, RESET_COLOR);
+
+	bzero(s1, sizeof(s1));
+	printf("%s\n", strcpy(s1, s2));
+	bzero(s1, sizeof(s1));
+	printf("%s\n", ft_strcpy(s1, s2));
+}
+
 void test_ft_strcpy()
 {
 	printf("%sTest_ft_strcpy%s\n", YELLOW, RESET_COLOR);
 
-	speed_test_comparisons();
+	test_speed_comparisons();
 	test_empty_string();
 	test_lessthan_16bytes_string();
 	test_16bytes_string();
@@ -167,6 +182,7 @@ void test_ft_strcpy()
 	test_32bytes_string();
 	test_42bytes_string();
 	test_256bytes_string();
+	(void)test_null_string;
 
 	printf("\n");
 }

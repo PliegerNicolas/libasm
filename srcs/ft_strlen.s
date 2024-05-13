@@ -7,6 +7,7 @@ global ft_strlen                    ; entry-point for linker.
         ; Returns:
         ;   rax - Length of the string excluding null terminator.
 
+        endbr64                         ; Mark the start of a function for control flow integrity (CFI) protection.
         xor         rax, rax            ; Set RAX to 0 through XOR operation. Counter of valid bytes/chars an return value.
         test        rdi, rdi            ; If RDI is set to NULL
         jz          .end                ; Jump to .end

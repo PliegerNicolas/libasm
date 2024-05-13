@@ -8,6 +8,7 @@ global  ft_strcpy   ; Entry-point for linker.
         ; Returns:
         ;   rax - Pointer to the destination string (copy of original rdi).
 
+        endbr64                             ; Mark the start of a function for control flow integrity (CFI) protection.
         xor         rcx, rcx                ; Set rcx to 0 through XOR operation. Used as common string offset index.
 
     .sse_loop:

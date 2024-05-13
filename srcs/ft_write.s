@@ -10,6 +10,7 @@ extern __errno_location                     ; Declare external symbol for errno.
         ; Returns:
         ;   rax - Length of the string excluding null terminator.
 
+        endbr64                             ; Mark the start of a function for control flow integrity (CFI) protection.
         ; Preparing the write syscall
         mov rax, 1                          ; Set syscall number for write.
                                             ; File descriptor is already stored in rdi

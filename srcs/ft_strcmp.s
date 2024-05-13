@@ -8,7 +8,7 @@ global ft_strcmp                            ; Entry-point for linker.
         ; Returns:
         ;   rax - An negative integer is s1 is less than s2. 0 if equal. A positive integer if s1 is more than s2.
 
-    .initialize:
+        endbr64                                         ; Mark the start of a function for control flow integrity (CFI) protection.
         xor         rax, rax                            ; Set RAX to 0 through XOR operation. Common string reading index and return value.
         xor         rcx, rcx                            ; Set RCX to 0 through XOR operation. Temporary storage for discrepency index.
 
