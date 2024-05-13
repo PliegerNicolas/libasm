@@ -1,38 +1,29 @@
-align 16
-global ft_strcpy                            ; Entry-point for linker.
+align   16
+global  ft_strcpy   ; Entry-point for linker.
 
     ft_strcpy:
-        ; Arguments:
-        ;   rdi (s1) - Destination buffer. Should be of sufficiant size to contain s2 and be null terminated.
-        ;   rsi (s2) - Source string. Should be null terminated.
-        ; Returns:
-        ;   rax - Pointer to the destination string (s1).
 
-        mov     rax, rdi                ; Store RDI (s1 pointer adr) in RAX so it can get returned.
-        xor     rcx, rcx                ; Set RCX to 0 through XOR operation. Will be used as common string index.
-        pxor    xmm0, xmm0              ; Set XMM0 to 0. Upper 8 bytes should be set to 0 because we only use quadwords.
+        xor         rbx, rbx                ; Set RBX to 0 through XOR operation. Used as common string offset index.
 
-    .qword_loop:
-        movq        xmm0, [rsi + rcx]   ; Move quadword (8bytes) to lower 8 bytes of XMM0.
-        pxor        xmm1, xmm1          ; Set XMM1 to 0.
-        pcmpeqb     xmm1, xmm0          ; Compare byte/byte XMM0 with XMM1 (null). Common values are set to 0xFF (1), else 0x00 (0).
-                                        ;   XMM1 now contains positions of XMM0's null bytes (as 1/0xFF).
-        pmovmskb    ebx, xmm1           ; Store per byte MSB of XMM0 in EBX's 16 lowest bits.
-        test        bl, bl              ; Check if BL (2 lowest bytes of RBX) is 0. This means no null bytes are found.
-        jnz         .byte_loop          ; If false. Jump to .null_byte_found. This is explicit.
+    .sse_loop:
+        movdqu      xmm0, [rsi + rbx]       ; Move 16 bytes (128 bits) of data from RSI + offset RBX to XMM0.
+        pxor        xmm1, xmm1              ; Set XMM1 to 0 through XOR operation. Will be used to check 0x0 in XMM0.
+        pcmpeqb     xmm1, xmm0              ; Compare byte/byte XMM0 with XMM1 and store result in XMM1. 0xFF is set if common character found, else 0x0.
+                                            ;   Now, XMM1 represents the null bytes of XMM0 at respective byte positions. 0xFF means 0x0. 0x0 means other.
+        pmovmskb    ecx, xmm1               ; Store MSB of each byte of XMM1 in ECX's 16 lowest bits (CX). If ECX is 0, ZeroFlag is set.
+        test        cx, cx                  ; Add test CX, CX for branch prediction optimization. Could be removed.
+        jnz         .byte_loop              ; If ECX not 0, jump to .byte_loop.
 
-        movq        [rdi + rcx], xmm0   ; Move stored 8 bytes in RDI to copy characters.
-        add         rcx, 8              ; Increment RCX by 8 bytes.
-        jmp         .qword_loop         ; Jump to .loop unciditonally.
+        movdqu      [rdi + rbx], xmm0       ; Copy XMM0 in RDI, with RBX offset.
+        add         rbx, 16                 ; Increment RBX by 16 bytes.
+        jmp         .sse_loop               ; Jump unconditionally to .sse_loop.
 
     .byte_loop:
-        mov     bl, byte [rsi + rcx]    ; Store first char/byte of [rsi] with offset RCX in BL.
-        mov     byte [rdi + rcx], bl    ; Copy character in RDI at relative position.
-        inc     rcx                     ; Increment RCX (common index).
-        test    bl, bl                  ; Verify if null byte not reached (BL).
-        jnz     .byte_loop              ; If no jump byte found, jump to .null_byte_found.
+        mov         cl, byte [rsi + rbx]    ; Copy the first byte of RSI at offset RBX in CL.
+        mov         byte [rdi + rbx], cl    ; Copy CL to RDI at corresponding (RBX offset) position.
+        inc         rbx                     ; Increment RBX by 1 byte (to check next character).
+        test        cl, cl                  ; Verify if CL is set as null byte (0x0).
+        jnz         .byte_loop              ; If CL is not null, jump to .byte_loop.
+        ret                                 ; Return RAX, containing the pointer address to RDI.
 
-    .end:
-        ret
-
-; Using qword for bulk data copying. Could use SSE. Easy to implement. This is slower than the origian strcpy the longer the strings are.
+; My implementation is a bit slower than the original. Specifically on long strings. I can't figure out why. Maybe branch prediction optimization ? But not in a significant amount.

@@ -1,22 +1,23 @@
 #include "libasm.h"
 #include "libasm_tester.h"
 
-static void ft_test_speed(const char *s2, const size_t buffer_size, char *(*f)(char *, const char *))
+static void    ft_test_speed(const char *s2, char *(*f)(char *, const char *))
 {
 	struct	timespec	start_time, end_time;
-	double				elapsed_time, average_elapsed_time;
-	double				total_elapsed_time = 0.00;
+	double	elapsed_time, average_elapsed_time;
+	double	total_elapsed_time = 0.00;
 
-	char				*s1 = NULL;
-	s1 = malloc((buffer_size + 1) * sizeof(*s1));
-
-	bzero(s1, buffer_size);
+	char	s1[256];
 
 	for (int i = 0; i < 500; ++i)
+	{
+		bzero(s1, sizeof(s1));
 		f(s1, s2);
+	}
 
 	for (int i = 0; i < 5000; ++i)
 	{
+		bzero(s1, sizeof(s1));
 		clock_gettime(CLOCK_MONOTONIC, &start_time);
 		f(s1, s2);
 		clock_gettime(CLOCK_MONOTONIC, &end_time);
@@ -26,82 +27,131 @@ static void ft_test_speed(const char *s2, const size_t buffer_size, char *(*f)(c
 
 	average_elapsed_time = total_elapsed_time / 500;
 	printf("Average elapsed time: %f ms\n", average_elapsed_time);
-	free(s1);
 }
 
-static void	test_string_len_speed()
+static void	speed_test_comparisons()
 {
 	char	*s = NULL;
-	printf("%stest_string_len_speed%s\n", GREEN, RESET_COLOR);
 
-	printf("%sempty%s\n", BLUE, RESET_COLOR);
+	printf("%sEmpty%s\n", BLUE, RESET_COLOR);
 	s = "";
-	ft_test_speed(s, strlen(s) + 1, strcpy);
-	ft_test_speed(s, strlen(s) + 1, ft_strcpy);
+	ft_test_speed(s, strcpy);
+	ft_test_speed(s, ft_strcpy);
 
-	printf("%sshort%s\n", BLUE, RESET_COLOR);
-	s = "Short";
-	ft_test_speed(s, strlen(s) + 1, strcpy);
-	ft_test_speed(s, strlen(s) + 1, ft_strcpy);
+	printf("%sReally short%s\n", BLUE, RESET_COLOR);
+	s = ".";
+	ft_test_speed(s, strcpy);
+	ft_test_speed(s, ft_strcpy);
 
-	printf("%smedium%s\n", BLUE, RESET_COLOR);
-	s = "A string longer than 16 chars.";
-	ft_test_speed(s, strlen(s) + 1, strcpy);
-	ft_test_speed(s, strlen(s) + 1, ft_strcpy);
+	printf("%sShort%s\n", BLUE, RESET_COLOR);
+	s = "A short string.";
+	ft_test_speed(s, strcpy);
+	ft_test_speed(s, ft_strcpy);
 
-	printf("%slong%s\n", BLUE, RESET_COLOR);
-	s = "A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string. A long and repetitive string.";
-	ft_test_speed(s, strlen(s) + 1, strcpy);
-	ft_test_speed(s, strlen(s) + 1, ft_strcpy);
+	printf("%sMedium%s\n", BLUE, RESET_COLOR);
+	s = "Medium using SSE loop once.";
+	ft_test_speed(s, strcpy);
+	ft_test_speed(s, ft_strcpy);
 
-	printf("%sreally long%s\n", BLUE, RESET_COLOR);
-	s = "A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string. A really long and repetitive string.";
-	ft_test_speed(s, strlen(s) + 1, strcpy);
-	ft_test_speed(s, strlen(s) + 1, ft_strcpy);
+	printf("%sLong%s\n", BLUE, RESET_COLOR);
+	s = "With such long strings normally SSE loop should be utilized more than once and provide good performance. Let's see if it's true ...";
+	ft_test_speed(s, strcpy);
+	ft_test_speed(s, ft_strcpy);
+
+	printf("%sreally Long%s\n", BLUE, RESET_COLOR);
+	s = "Well. I don't know what I should write to get to 256 bytes but guess we're almost there ? Oh no. That was 90, we're gonna have to fill this in with random things again. 169 now ? Nice. Pity we're not planning to reach 420. We're aiming for 256 and hop !!!";
+	ft_test_speed(s, strcpy);
+	ft_test_speed(s, ft_strcpy);
 }
 
-static void	test_copy_empty_to_empty()
+static void	test_empty_string()
 {
-	char		s1[1] = { 0 };
-	const char	*s2 = "";
+	char	s1[256];
+	char	*s2 = "";
+	
+	printf("%sTest_empty_string%s\n", GREEN, RESET_COLOR);
 
-	printf("%sTest_copy_empty_to_empty%s\n", GREEN, RESET_COLOR);
-
-	printf("%s | ", strcpy(s1, s2));
-	printf("%s\n", ft_strcpy(s1, s2));
-}
-
-static void	test_copy_limit_bytes()
-{
-	char	s1[17] = { 0 };
-	char	*s2 = NULL;
-
-	printf("%sTest_copy_limit_bytes%s\n", GREEN, RESET_COLOR);
-
-	s2 = "abcdefghijklmn";
-
-	printf("%s | ", strcpy(s1, s2));
-	printf("%s\n", ft_strcpy(s1, s2));
-
-	s2 = "abcdefghijklmno";
-
-	printf("%s | ", strcpy(s1, s2));
-	printf("%s\n", ft_strcpy(s1, s2));
-
-	s2 = "abcdefghijklmnop";
-
-	printf("%s | ", strcpy(s1, s2));
+	bzero(s1, sizeof(s1));
+	printf("%s\n", strcpy(s1, s2));
+	bzero(s1, sizeof(s1));
 	printf("%s\n", ft_strcpy(s1, s2));
 }
 
-static void	test_copy_multi_null_byte()
+static void	test_lessthan_16bytes_string()
 {
-	char	s1[10] = { 0 };
-	char	*s2 = "Multi\0null\0bytes\0used\0in\0string\0";
+	char	s1[256];
+	char	*s2 = "8 bytes";
+	
+	printf("%sTest_lessthan_16bytes_string%s\n", GREEN, RESET_COLOR);
 
-	printf("%sTest_copy_limit_null_bytes%s\n", GREEN, RESET_COLOR);
+	bzero(s1, sizeof(s1));
+	printf("%s\n", strcpy(s1, s2));
+	bzero(s1, sizeof(s1));
+	printf("%s\n", ft_strcpy(s1, s2));
+}
 
-	printf("%s | ", strcpy(s1, s2));
+static void	test_16bytes_string()
+{
+	char	s1[256];
+	char	*s2 = "There, 16 bytes";
+	
+	printf("%sTest_16bytes_string%s\n", GREEN, RESET_COLOR);
+
+	bzero(s1, sizeof(s1));
+	printf("%s\n", strcpy(s1, s2));
+	bzero(s1, sizeof(s1));
+	printf("%s\n", ft_strcpy(s1, s2));
+}
+
+static void	test_17bytes_string()
+{
+	char	s1[256];
+	char	*s2 = "There, 17 bytes!";
+	
+	printf("%sTest_17bytes_string%s\n", GREEN, RESET_COLOR);
+
+	bzero(s1, sizeof(s1));
+	printf("%s\n", strcpy(s1, s2));
+	bzero(s1, sizeof(s1));
+	printf("%s\n", ft_strcpy(s1, s2));
+}
+
+static void	test_32bytes_string()
+{
+	char	s1[256];
+	char	*s2 = "Well that's much, 32 bytes, no?";
+	
+	printf("%sTest_32bytes_string%s\n", GREEN, RESET_COLOR);
+
+	bzero(s1, sizeof(s1));
+	printf("%s\n", strcpy(s1, s2));
+	bzero(s1, sizeof(s1));
+	printf("%s\n", ft_strcpy(s1, s2));
+}
+
+static void	test_42bytes_string()
+{
+	char	s1[256];
+	char	*s2 = "Well that's much, 42 bytes, aren't there?";
+	
+	printf("%sTest_42bytes_string%s\n", GREEN, RESET_COLOR);
+
+	bzero(s1, sizeof(s1));
+	printf("%s\n", strcpy(s1, s2));
+	bzero(s1, sizeof(s1));
+	printf("%s\n", ft_strcpy(s1, s2));
+}
+
+static void	test_256bytes_string()
+{
+	char	s1[256];
+	char	*s2 = "I have to fill this string with 256 characters but this is hard to do. I don't know what to write about so I'll talk about nothing. What is nothing ? Nothing isn't empty. Otherwise it would be the same word and we wouldn't say I'm talking about nothing :)";
+	
+	printf("%sTest_256bytes_string%s\n", GREEN, RESET_COLOR);
+
+	bzero(s1, sizeof(s1));
+	printf("%s\n", strcpy(s1, s2));
+	bzero(s1, sizeof(s1));
 	printf("%s\n", ft_strcpy(s1, s2));
 }
 
@@ -109,10 +159,14 @@ void test_ft_strcpy()
 {
 	printf("%sTest_ft_strcpy%s\n", YELLOW, RESET_COLOR);
 
-	test_string_len_speed();
-	test_copy_empty_to_empty();
-	test_copy_limit_bytes();
-	test_copy_multi_null_byte();
+	speed_test_comparisons();
+	test_empty_string();
+	test_lessthan_16bytes_string();
+	test_16bytes_string();
+	test_17bytes_string();
+	test_32bytes_string();
+	test_42bytes_string();
+	test_256bytes_string();
 
- printf("\n");
+	printf("\n");
 }

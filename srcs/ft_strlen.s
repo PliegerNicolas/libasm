@@ -7,26 +7,20 @@ global ft_strlen                    ; entry-point for linker.
         ; Returns:
         ;   rax - Length of the string excluding null terminator.
 
-    .initialization:
-        xor         rax, rax            ; Set RAX to 0 through XOR operation.
-        xor         rcx, rcx            ; Set ECX to 0 through XOR operation.
-        cld                             ; Clear direction flag for BSF (bit scan).
+        xor         rax, rax            ; Set RAX to 0 through XOR operation. Counter of valid bytes/chars an return value.
+        test        rdi, rdi            ; If RDI is set to NULL
+        jz          .end                ; Jump to .end
 
-    .loop:
-        movdqu      xmm0, [rdi]         ; Move 16-bytes (128-bits) of dereferenced RSI to XMM0.
-        add         rdi, 16             ; Move RDI 16 bytes forward for next loop.
-
-        pxor        xmm1, xmm1          ; Set XMM1 to 0 through XOR operation.
-        pcmpeqb     xmm1, xmm0          ; Compare XMM0 with XMM1, byte/byte. If equal XMM1 is filled with 0xFF, else 0x00
-        
-        pmovmskb    ecx, xmm1           ; Move the MSB of each byte to ECX. ECX is 32bytes so only the 16 LSB are affected, the rest is set to 0.
-        or          ecx, 0xFFFF0000     ; Set the MSB of each byte of ECX to 1 to ensure only 16 0 can be found per read later on by BSF.
-
-        bsf         ecx, ecx            ; Bit scan ECX forward until 1 is found (from LSB to MSB). This retrieve the index on the 16 bytes of the first null byte.
-        add         rax, rcx            ; Add ECX (through RCX) to RAX
-
-        sub         rcx, 16             ; Substract 16 from rcx. It no null bytes have been found it sets RCX to 0.
-        jz          .loop               ; If RCX is 0, jump to .loop
+    .ft_strlen_loop:
+        movdqu      xmm0, [rdi + rax]   ; Move 16-bytes (128-bits) of dereferenced RSI to XMM0. Offset with RAX (already counted characters).
+        pcmpeqb     xmm1, xmm0          ; Compare byte/byte XMM0 with XMM1 and store result in XMM1. 0xFF is set if common character found, else 0x0.
+                                        ;   Now, XMM1 represents the null bytes of XMM0 at respective byte positions. 0xFF means 0x0. 0x0 means other.
+        pmovmskb    ecx, xmm1           ; Store MSB of each byte of XMM1 in ECX's lowest bits (CL). If ECX is 0, ZeroFlag is set.
+        or          ecx, 0xFFFF0000     ; Set the MSB of each byte of ECX to 1 to ensure bsf sets ECX to 16 if no 1 (0xFF) has been found.
+        tzcnt       ecx, ecx            ; Count trailing zeros from LSB to MSB. It is faster than bsf.
+        add         rax, rcx            ; Increment RAX with the result of bsf (ECX through RCX).
+        sub         rcx, 16             ; Remove 16 from ECX. If 0, it means 16 characters where counted.
+        jz          .ft_strlen_loop     ; If zero flag set, jump to .ft_strlen_loop.
 
     .end:
         ret

@@ -34,57 +34,57 @@ static void	test_speed()
 static void	test_empty_string()
 {
 	printf("%sTest_empty_string%s\n", GREEN, RESET_COLOR);
+	const char	*s = "";
 
-	printf("%ld | ", strlen(""));
-	printf("%ld\n", ft_strlen(""));
+	printf("%ld | ", strlen(s));
+	printf("%ld\n", ft_strlen(s));
 }
 
-static void	test_one_character()
+static void	test_lessthan16bytes_nullterm_string()
 {
-	printf("%sTest_one_character%s\n", GREEN, RESET_COLOR);
+	printf("%sTest_lessthan16bytes_nullterm_string%s\n", GREEN, RESET_COLOR);
+	const char	*s = "Hello";
 
-	printf("%ld | ", strlen("a"));
-	printf("%ld\n", ft_strlen("a"));
+	printf("%ld | ", strlen(s));
+	printf("%ld\n", ft_strlen(s));
 }
 
-static void	test_hellow_world()
+static void	test_16bytes_nullterm_string()
 {
-	printf("%sTest_hello_world%s\n", GREEN, RESET_COLOR);
+	printf("%sTest_16bytes_nullterm_string%s\n", GREEN, RESET_COLOR);
+	const char	*s = "Here, 16 bytes!";
 
-	printf("%ld | ", strlen("a"));
-	printf("%ld\n", ft_strlen("a"));
+	printf("%ld | ", strlen(s));
+	printf("%ld\n", ft_strlen(s));
 }
 
-static void	test_middle_null_char()
+static void	test_17bytes_nullterm_string()
 {
-	printf("%sTest_middle_null_char%s\n", GREEN, RESET_COLOR);
+	printf("%sTest_17bytes_nullterm_string%s\n", GREEN, RESET_COLOR);
+	const char *s = "Here, 17 bytes !";
 
-	printf("%ld | ", strlen("Hello\0world"));
-	printf("%ld\n", ft_strlen("Hello\0world"));
+	printf("%ld | ", strlen(s));
+	printf("%ld\n", ft_strlen(s));
 }
 
-static void	test_end_null_char()
+static void	test_long_nullterm_string()
 {
-	printf("%sTest_end_null_char%s\n", GREEN, RESET_COLOR);
+	printf("%sTest_long_nullterm_string%s\n", GREEN, RESET_COLOR);
+	const char *s = "This is a quite long string. It could be longer if I had the energy to write more characters ... Well. Okay. Sure. I can go on. But it's just because I have too dude. Are you sure it's okay to write this much data ? Wouldn't my file become too heavy ? It might already weight 2GB. Dunno. Haven't checked.";
 
-	printf("%ld | ", strlen("This is a test\0"));
-	printf("%ld\n", ft_strlen("This is a test\0"));
+	printf("%ld | ", strlen(s));
+	printf("%ld\n", ft_strlen(s));
 }
 
-static void	test_special_characters()
+static void	test_non_nullterm_string()
 {
-	printf("%sTest_special_characters%s\n", GREEN, RESET_COLOR);
+	printf("%sTest_non_nullterm_string (buffer of size 1024)%s\n", GREEN, RESET_COLOR);
+	char	s[1024];
 
-	printf("%ld | ", strlen("Special characters: !@#$%^&*()"));
-	printf("%ld\n", ft_strlen("Special characters: !@#$%^&*()"));
-}
+	memset(s, '$', sizeof(s));
 
-static void	test_long_string()
-{
-	printf("%sTest_long_string%s\n", GREEN, RESET_COLOR);
-
-	printf("%ld | ", strlen("This is a very long string to test the efficiency of the strlen function. It should return the correct length regardless of the string's length."));
-	printf("%ld\n", ft_strlen("This is a very long string to test the efficiency of the strlen function. It should return the correct length regardless of the string's length."));
+	printf("%ld | ", strlen(s));
+	printf("%ld\n", ft_strlen(s));
 }
 
 void    test_ft_strlen()
@@ -93,12 +93,11 @@ void    test_ft_strlen()
 
 	test_speed();
 	test_empty_string();
-	test_one_character();
-	test_hellow_world();
-	test_middle_null_char();
-	test_end_null_char();
-	test_special_characters();
-	test_long_string();
+	test_lessthan16bytes_nullterm_string();
+	test_16bytes_nullterm_string();
+	test_17bytes_nullterm_string();
+	test_long_nullterm_string();
+	test_non_nullterm_string();
 
 	printf("\n");
 }
