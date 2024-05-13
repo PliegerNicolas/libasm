@@ -40,7 +40,7 @@ global ft_strcmp                            ; Entry-point for linker.
 
         pmovmskb    ecx, xmm0                           ; Store per byte MSB of XMM0 in ECX's 16 lowest bits.
         not         ecx                                 ; Invert ECX's bits for usage with BSF.
-        bsf         ecx, ecx                            ; Bit scan ECX forward until 1 is found. This retrieve the index on the 16 bytes of the discrepent character.
+        tzcnt       ecx, ecx                            ; Count trailing zeros from LSB to MSB. It is faster than bsf.
 
         add         rax, rcx                            ; Add ECX (through RCX) to RGB.
         cmp         ecx, 16                             ; Compare ECX to 16.
