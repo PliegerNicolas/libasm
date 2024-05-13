@@ -1,3 +1,4 @@
+align 16
 global ft_write                             ; Entry-point for linker.
 extern __errno_location                     ; Declare external symbol for errno.
 
