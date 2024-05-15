@@ -31,7 +31,7 @@ ft_strlen:
         pcmpeqb         xmm1, xmm0              ; Compare byte per byte xmm0 with xmm1. Store result in xmm0. If common byte found (null byte), set 0xFF else 0x00.
         pmovmskb        ecx, xmm1               ; Move MSB of xmm1's 16 bytes to cx (ecx's 16 lowest bytes). pmovmskb expects a 32 bit register but we'll use half of it.
         tzcnt           cx, cx                  ; Count until first found non null-byte from LSB to MSB in cx.
-        jnc             .end                    ; If carry-out flag not set, jump to .end. CF is et when tzcnt hits the end of cx.
+        jnc             .end                    ; If carry-out flag not set, jump to .end. CF is set when tzcnt hits the end of cx.
         add             rax, 16                 ; Add 16 bytes (length of xmm0).
         jmp             .loop                   ; Jump unconditionally to .loop.
 

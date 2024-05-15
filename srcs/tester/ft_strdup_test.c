@@ -73,11 +73,139 @@ static void	test_speed_comparisons()
 	ft_test_speed(s_src, ft_strdup);
 }
 
+static void	test_empty_string()
+{
+	char	*s1 = NULL;
+	char	*s2 = "";
+	
+	printf("%sTest_empty_string%s\n", GREEN, RESET_COLOR);
+
+	s1 = strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+	s1 = ft_strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+}
+
+static void	test_lessthan_16bytes_string()
+{
+	char	*s1 = NULL;
+	char	*s2 = "8 bytes";
+	
+	printf("%sTest_lessthan_16bytes_string%s\n", GREEN, RESET_COLOR);
+
+	s1 = strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+	s1 = ft_strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+}
+
+static void	test_16bytes_string()
+{
+	char	*s1 = NULL;
+	char	*s2 = "There, 16 bytes";
+	
+	printf("%sTest_16bytes_string%s\n", GREEN, RESET_COLOR);
+
+	s1 = strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+	s1 = ft_strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+}
+
+static void	test_17bytes_string()
+{
+	char	*s1 = NULL;
+	char	*s2 = "There, 17 bytes!";
+	
+	printf("%sTest_17bytes_string%s\n", GREEN, RESET_COLOR);
+
+	s1 = strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+	s1 = ft_strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+}
+
+static void	test_32bytes_string()
+{
+	char	*s1 = NULL;
+	char	*s2 = "Well that's much, 32 bytes, no?";
+	
+	printf("%sTest_32bytes_string%s\n", GREEN, RESET_COLOR);
+
+	s1 = strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+	s1 = ft_strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+}
+
+static void	test_42bytes_string()
+{
+	char	*s1 = NULL;
+	char	*s2 = "Well that's much, 42 bytes, aren't there?";
+	
+	printf("%sTest_42bytes_string%s\n", GREEN, RESET_COLOR);
+
+	s1 = strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+	s1 = ft_strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+}
+
+static void	test_256bytes_string()
+{
+	char	*s1 = NULL;
+	char	*s2 = "I have to fill this string with 256 characters but this is hard to do. I don't know what to write about so I'll talk about nothing. What is nothing ? Nothing isn't empty. Otherwise it would be the same word and we wouldn't say I'm talking about nothing :)";
+	
+	printf("%sTest_256bytes_string%s\n", GREEN, RESET_COLOR);
+
+	s1 = strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+	s1 = ft_strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+}
+
+static void	test_null_string()
+{
+	char	*s1 = NULL;
+	char	*s2 = NULL;
+	
+	printf("%sTest_null_string%s\n", GREEN, RESET_COLOR);
+
+	s1 = strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+	s1 = ft_strdup(s2);
+	printf("%s (errno: %s)\n", s1, strerror(errno));
+	free(s1);
+}
+
 void    test_ft_strdup()
 {
     printf("%sTest_ft_strdup%s\n", YELLOW, RESET_COLOR);
 
 	test_speed_comparisons();
+	test_empty_string();
+	test_lessthan_16bytes_string();
+	test_16bytes_string();
+	test_17bytes_string();
+	test_32bytes_string();
+	test_42bytes_string();
+	test_256bytes_string();
+	(void)test_null_string;
 
     printf("\n");
 }

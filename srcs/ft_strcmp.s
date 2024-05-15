@@ -62,11 +62,11 @@ ft_strcmp:
         sub         rax, rcx                    ; Substitute rax with rcx.
 
     ; Normalize output.
-        test        rax, rax                            ; Check if RAX is 0.
-        jz          .end                                ; If RAX is 0, jump to .end.
-        mov         rax, 1                              ; Set RAX to 1.
-        jns         .end                                ; If not signed, jump to .end
-        neg         rax                                 ; Negate RAX.
+        test        rax, rax                    ; Check if rax is 0.
+        jz          .end                        ; If rax is 0, jump to .end.
+        mov         rax, 1                      ; Set rax to 1.
+        jns         .end                        ; If not signed, jump to .end
+        neg         rax                         ; Negate rax.
 
     .end:
         pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.

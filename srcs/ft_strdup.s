@@ -1,60 +1,64 @@
-extern  ft_strlen                   ; Declare external symbol for ft_strlen
-    ; Arguments:
-    ;   rdi - Pointer to start of null-terminated string.
-    ; Returns:
-    ;   rax - Length of the string excluding null terminator.
-extern  ft_strcpy                   ; Declare external symbol for ft_strcpy
-    ; Arguments:
-    ;   rdi (s1) - Destination buffer. Should be of sufficiant size to contain s2 and it's terminator null byte.
-    ;   rsi (s2) - Source string. Should be null terminated.
-    ; Returns:
-    ;   rax - Pointer to the destination string (copy of original rdi).
-extern  malloc                      ; Declare external symbol for malloc
-    ; Arguments:
-    ;   rdi - Size in bytes of memory to allocate.
-    ; Returns:
-    ;   rax - Ptr to new memory.
-extern __errno_location             ; Declare external symbol for errno.
+section .text
+    ; Padding to align to 16 bytes.
+    align   16
 
-align   16
-global  ft_strdup                   ; Entry-point for linker.
+    ; External symbol declarations: start.
+    extern  ft_strlen
+    extern  malloc
+    extern  ft_strcpy
+    extern  __errno_location
+    ; External symbol declarations: end.
 
-    ft_strdup:
+    ; Function entry-point for linker.
+    global  ft_strdup
+
+    ; Information on ft_strdup.
         ; Arguments:
-        ;   rdi (s) - Pointer to string that we want to duplicate.
+        ;   RDI - Pointer/Address targeting null-terminated string (s) in memory that we want to duplicate.
         ; Returns:
-        ;   rax - New pointer containing the same data as what' original RDI points to.
+        ;   RAX - New pointer/address containing the same data as rdi points to.
 
-        endbr64                     ; Mark the start of a function for control flow integrity (CFI) protection.
-        push    rdi                 ; Push RDI onto the stack.
+ft_strdup:
 
-        ; ft_strlen: { args: [RDI contains ptr to str], ret: [RAX is undefined] }
-        call    ft_strlen           ; Call ft_strlen. Returns the length of the string, null byte excluded.
-        inc     rax                 ; Increment RAX by 1 to account for null byte.
+    ; ft_strdup initialization.
+        endbr64                                 ; AMD specific branch prediction hint.
+        push        rbp                         ; Push previous base pointer on top of stack.
+        mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
 
-        ; malloc: { args: [RDI contains size in bytes to allocate], ret: [RAX is new ptr] }
-        mov     rdi, rax            ; Store size in bytes (RAX) for malloc in RDI.
-        call    malloc wrt ..plt    ; Call malloc. Allocates RDI bytes of memory and returns new ptr in RAX or 0x0 on fail.
-        test    rax, rax            ; Check if RAX is set to 0x0.
-        jz      .error              ; If 0, jump to .error
+    ; ft_strdup start.
 
-        ; ft_strcpy: { args: [RDI contains ptr to dest str (to copy to), RSi contains ptr of source str (to copy from)], ret: [RAX is undefined] }
-        pop     rdi                 ; Restore RDI from stack.
-        mov     rsi, rdi            ; Move RDI to RSI.
-        mov     rdi, rax            ; Copy new ptr to RDI.
-        call    ft_strcpy
+        push        rdi                         ; Store rdi (pointer of string to copy) on top of the stack to preserve it.
+
+    ; ft_strlen { args: [RDI contains ptr to str], ret: [rax is set to length of string, null-byte excluded] }
+        mov         rdi, rdi                    ; Useless instruction. Just to specify that rdi is set as requested by strlen.
+        call        ft_strlen                   ; Call ft_strlen.
+        inc         rax                         ; Increment rax to account for the null-byte.
+
+    ; malloc: { args: [RDI contains size in bytes to allocate], ret: [rax is set to new ptr/addr] }
+        mov         rdi, rax                    ; Store the result of strlen (rax) in rdi as requested by malloc.
+        call        malloc wrt ..plt            ; Call malloc.
+        test        rax, rax                    ; Check malloc's return value.
+        jz          .error                      ; If 0x0, jump to .error
+
+    ; ft_strcpy: { args: [rdi contains ptr to dest str (to copy to), rsi contains ptr of source str (to copy from)], ret: [ptr/addr of rdi] }
+        mov         rdi, rax                    ; Move the ptr/addr of the target to rdi.
+        pop         rsi                         ; Restore the ptr/addr of the source string we want to copy from that was pushed previously to the stack in rsi as requested by strcpy.
+        call        ft_strcpy wrt ..plt                  ; Call ft_strcpy.
 
     .end:
-        ret
+        pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.
+        ret                                     ; Return (by default expects the content of rax).
 
     .error:
-        mov     rdi, ENOMEM                 ; Move error code to rdi. _errno_location will need rax.
-        call    __errno_location wrt ..plt  ; Call __errno_location, returns the memory address of the errno variable.
-        mov     [rax], rdi                  ; Set errno value by dereferencing it and giving it the rdi value.
-        mov     rax, 0x0                    ; Set return value (rax) to -1.
-        jmp     .end                        ; Jump to .end unconditionally.
-    
+        mov     rdi, ENOMEM                     ; Move error code to rdi. _errno_location will need rax.
+        call    __errno_location wrt ..plt      ; Call __errno_location, returns the memory address of the errno variable.
+        mov     [rax], rdi                      ; Set errno value by dereferencing it and giving it the rdi value.
+        mov     rax, 0x0                        ; Set return value (rax) to -1.
+        jmp     .end                            ; Jump to .end unconditionally.
+
 section .data
     ENOMEM equ  12                  ; Err code for POSIX-compliant systems: 'Not Enough Memory'
 
-; My implementation is significantly slower than the original one. It is because it accumulates the defaults of the called functions.
+; This implementation of strdup is significantly slower to the original clib strdup, even when calling the original functions.
+; I don't know how to optimize it more without reinventing the wheel.
+; It supposedly follows conventions. At least those I know about. If not, do not hesitate to tell me.
