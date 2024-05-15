@@ -72,5 +72,5 @@ ft_strcmp:
         pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.
         ret                                     ; Return (by default expects the content of rax).
 
-; This implementation of strlen has similar performances to the original clib strlen.
+; This implementation of strcmp has similar performances to the original clib strcmp.
 ; It supposedly follows conventions. At least those I know about. If not, do not hesitate to tell me.
