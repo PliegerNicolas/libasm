@@ -12,8 +12,8 @@ section .text
     ; Information on ft_write.
         ; Arguments:
         ;   RDI - File discriptor to write to.
-        ;   RSI - Pointer/address of buffer to write to.
-        ;   RDX - Number of bytes to write.
+        ;   RSI - Pointer/address of buffer to read from.
+        ;   RDX - Number of bytes to read (and thus write).
         ; Returns:
         ;   RAX - Read bytes or -1 on error (errno is set).
 
@@ -45,5 +45,5 @@ ft_write:
         mov         rax, -1                     ; Set error code to -1.
         jmp         .end                        ; Jump unconditionally to .end.
 
-; This implementation of ft_strlen has similar performances to the original clib strlen.
+; This implementation of write has similar performances to the original clib write.
 ; It supposedly follows conventions. At least those I know about. If not, do not hesitate to tell me.

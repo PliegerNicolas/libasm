@@ -40,5 +40,5 @@ ft_strlen:
         pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.
         ret                                     ; Return (by default expects the content of RAX).
 
-; This implementation of ft_strlen has similar performances to the original clib strlen.
+; This implementation of strlen has similar performances to the original clib strlen.
 ; It supposedly follows conventions. At least those I know about. If not, do not hesitate to tell me.

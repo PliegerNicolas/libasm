@@ -28,10 +28,13 @@ static void	test_speed_comparisons()
 	char	*s = NULL;
 	int		fd = open("/dev/null", O_WRONLY);
 
-	if (fd == -1)
-		return ;
-
 	printf("%sTest_speed_comparisons%s\n", GREEN, RESET_COLOR);
+
+	if (fd == -1)
+	{
+		printf("%s\n", strerror(errno));
+		return ;
+	}
 
 	printf("%sEmpty%s\n", BLUE, RESET_COLOR);
 	s = "";

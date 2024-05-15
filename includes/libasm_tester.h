@@ -16,6 +16,7 @@
 # define GREEN "\x1b[32m"
 # define YELLOW "\x1b[33m"
 # define BLUE "\x1b[34m"
+# define GRAY "\x1b[90m"
 # define RESET_COLOR "\x1b[0m"
 
 # include <time.h>
