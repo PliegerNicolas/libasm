@@ -18,20 +18,6 @@ When creating your first Assembly code, you'll have to inform yourself and make 
 
 I'm using Ubuntu (linux) with a 86x 64 bit processor and 42 School student computers also. So we'll compile with NASM using the '-felf64' flag. Elf stands for Executable and Linkable Format and is specific to linux and unix-based systems.
 
-# Some sources so you can learn the necessary stuff.
-
-- A short video to explain assembly in 100 secondes: https://www.youtube.com/watch?v=4gwYkEK0gOk
-- Syntax, difference between AT&T and Intel: https://imada.sdu.dk/u/kslarsen/dm546/Material/IntelnATT.htm
-- English assembly tutorial: https://www.tutorialspoint.com/assembly_programming/index.htm
-- French assembly tutorial: https://lacl.u-pec.fr/tan/asm.pdf
-- syscall table for x86-60: https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64
-- standard calling convention: https://en.wikipedia.org/wiki/X86_calling_conventions
-
-- 42docs: https://harm-smits.github.io/42docs/projects/libasm
-- Student tutorial: https://gaultier.github.io/blog/x11_x64.html
-
-# Some things to remember.
-
 ### Registers structure
 
 Registers are fundamental components of the CPU. They are small storage location within the CPU that are extremly fast for data storage and manipulation (and they say that usual RAM is fast. It's nothing compared to cpu registers). They can be used for arithmetic operations, data movement and addressing for example.
@@ -50,6 +36,10 @@ Bad news. There is no direct way to modify the higher 32 bits of RAX or the high
 Register extensions provide flexibility, backward compatibility and future-proofing.
 
 To know how many different values a register can hold you can calculate that through 2^n where n is the number of bits the register can hold. 64bit registers can hold 18.4 quintillion different values and 6bit registers only 256. Witht he arrival of larger and larger registers, the way of using them has evolved and the potential of CPUs with it. More memory == More fun.
+
+# Main things to know.
+
+Careful. This isn't sufficiant. You should check my sources and even more. This is just a general overview (partical if you forgot something while coding).
 
 ### Caller/Callee-saved registers.
 
@@ -93,3 +83,15 @@ When programming you should consider the stack and the following two registers.
 Here are interesting videos explaining efficiently what you should know:
 - https://www.youtube.com/watch?v=RU5vUIl1vRs
 - https://www.youtube.com/watch?v=21u0Uerx0_Y
+
+# Some sources so you can learn the necessary stuff.
+
+- A short video to explain assembly in 100 secondes: https://www.youtube.com/watch?v=4gwYkEK0gOk
+- Syntax, difference between AT&T and Intel: https://imada.sdu.dk/u/kslarsen/dm546/Material/IntelnATT.htm
+- English assembly tutorial: https://www.tutorialspoint.com/assembly_programming/index.htm
+- French assembly tutorial: https://lacl.u-pec.fr/tan/asm.pdf
+- syscall table for x86-60: https://blog.rchapman.org/posts/Linux_System_Call_Table_for_x86_64
+- standard calling convention: https://en.wikipedia.org/wiki/X86_calling_conventions
+
+- 42docs: https://harm-smits.github.io/42docs/projects/libasm
+- Student tutorial: https://gaultier.github.io/blog/x11_x64.html
