@@ -16,7 +16,7 @@ section .text
 
 ft_strlen:
 
-    .initialization:
+    ; ft_write initialization.
         endbr64                                 ; AMD specific branch prediction hint.
         push        rbp                         ; Push previous base pointer on top of stack.
         mov         rbp, rsp                    ; Setup base pointer to current top of the stack.

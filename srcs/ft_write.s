@@ -1,34 +1,49 @@
-align 16
-global ft_write                             ; Entry-point for linker.
-extern __errno_location                     ; Declare external symbol for errno.
+section .text
+    ; Padding to align to 16 bytes.
+    align   16
 
-    ft_write:
+    ; External symbol declarations: start.
+    extern  __errno_location
+    ; External symbol declarations: end.
+
+    ; Function entry-point for linker.
+    global  ft_write
+
+    ; Information on ft_write.
         ; Arguments:
-        ;   rdi (fd) - File descriptor to write to.
-        ;   rsi (buf) - Buffer to write.
-        ;   rdx (count) - Length of buffer.
+        ;   RDI - File discriptor to write to.
+        ;   RSI - Pointer/address of buffer to write to.
+        ;   RDX - Number of bytes to write.
         ; Returns:
-        ;   rax - Length of the string excluding null terminator.
+        ;   RAX - Read bytes or -1 on error (errno is set).
 
-        endbr64                             ; Mark the start of a function for control flow integrity (CFI) protection.
-        ; Preparing the write syscall
-        mov rax, 1                          ; Set syscall number for write.
-                                            ; File descriptor is already stored in rdi
-                                            ; Buffer is already stored in rsi.
-                                            ; Length of buffer is already stored in rdx.
-        
-        syscall                             ; Invoke syscall (set to write).
+ft_write:
 
-        test    rax, rax                    ; Verify if syscall returned an error.
-        jns     .end                        ; Jump if the sign flag is not negative, indicating success.
+    ; ft_write initialization.
+        endbr64                                 ; AMD specific branch prediction hint.
+        push        rbp                         ; Push previous base pointer on top of stack.
+        mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
 
-    .error:
-        ; If error, set errno and return -1.
-        neg rax                             ; syscall returns negative error code. Invert it's sign.
-        mov rdi, rax                        ; Move error code to rdi. _errno_location will need rax.
-        call    __errno_location wrt ..plt  ; Call __errno_location, returns the memory address of the errno variable.
-        mov [rax], rdi                      ; Set errno value by dereferencing it and giving it the rdi value.
-        mov rax, -1                         ; Set return value (rax) to -1.
+    ; ft_write start.
+        mov         rdi, rdi                    ; rdi is already set by passed argument.
+        mov         rsi, rsi                    ; rsi is already set by passed argument.
+        mov         rdx, rdx                    ; rdx is already set by passed argument.
+        mov         rax, 1                      ; Set syscall value (1: sys_write).
+        syscall                                 ; Trigger the syscall.
+        test        rax, rax                    ; Verify return value of syscall.
+        js          .error                      ; If sign flag is negative, jump to .error.
 
     .end:
-        ret                                 ; Return length stored in rax (default).
+        pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.
+        ret                                     ; Return (by default expects the content of RAX).
+
+    .error:
+        neg         rax                         ; Invert the negative error code returned by syscall.
+        mov         rdi, rax                    ; Move rax to rdi to preserve it's value. Call __errno_location would overwrite rax.
+        call        __errno_location wrt ..plt  ; Call __errno_location. It will return the pointer/address to errno.
+        mov         [rax], rdi                  ; Move the error code from rdi to the memory location pointer by rax (errno).
+        mov         rax, -1                     ; Set error code to -1.
+        jmp         .end                        ; Jump unconditionally to .end.
+
+; This implementation of ft_strlen has similar performances to the original clib strlen.
+; It supposedly follows conventions. At least those I know about. If not, do not hesitate to tell me.
