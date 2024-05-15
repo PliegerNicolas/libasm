@@ -23,11 +23,11 @@ ft_strlen:
 
     ; ft_strlen start.
         xor             rax, rax                ; Set rax to 0 througb XOR operation. It will contain the result and serve as offset (counter valid character bytes).
-        xor             rcx, rcx                ; set rcx to 0 through XOR operation.
         pxor            xmm1, xmm1              ; Set xmm1 to 0 through XOR operation. It will be used compare it with xmm0 and check for null-bytes.
 
     .loop:
         movdqu          xmm0, [rdi + rax]       ; Move 16-bytes (128-bits) to XMM0. Accounting the address contained in RDI and the rax offset.
+                                                ; Here I am using SSE (SMID) to read 16 character per 16 characters.
         pcmpeqb         xmm1, xmm0              ; Compare byte per byte XMM0 with XMM1. If common byte found (null byte), set 0xFF else 0x00.
         pmovmskb        ecx, xmm1               ; Move MSB of XMM1's 16 bytes to CX (ECX's 16 lowest bytes). pmovmskb expects a 32 bit register but we'll use half of it.
         tzcnt           cx, cx                  ; Count until first found non null-byte from LSB to MSB in cx.
