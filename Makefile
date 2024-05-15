@@ -51,7 +51,11 @@ ASM_SOURCES_NAMES			:=				ft_read \
 											ft_strlen \
 											ft_write \
 
-ASM_SOURCES_NAMES_BONUS		:=				\
+ASM_SOURCES_NAMES_BONUS		:=				ft_atoi_base \
+											ft_list_push_front \
+											ft_list_remove_if \
+											ft_list_size \
+											ft_list_sort \
 
 ifeq (bonus, $(filter bonus, $(MAKECMDGOALS)))
 	ASM_SOURCES_NAMES		+=				$(ASM_SOURCES_NAMES_BONUS)
