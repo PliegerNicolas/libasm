@@ -1,57 +1,67 @@
-align 16
-global ft_strcmp                            ; Entry-point for linker.
+section .text
+    ; Padding to align to 16 bytes.
+    align   16
 
-    ft_strcmp:
+    ; External symbol declarations: start.
+    ; External symbol declarations: end.
+
+    ; Function entry-point for linker.
+    global  ft_strcmp
+
+    ; Information on ft_strcmp.
         ; Arguments:
-        ;   rdi (s1) - First string to compare with. Not aligned by default.
-        ;   rsi (s2) - Second string to compare with. Not aligned by default.
+        ;   RDI - Pointer/Address to targeted null-terminated string in memory. String to compare (s1) with.
+        ;   RSI - Pointer/Address to targeted null-terminated string in memory. String to compare (s2) to.
         ; Returns:
-        ;   rax - An negative integer is s1 is less than s2. 0 if equal. A positive integer if s1 is more than s2.
+        ;   RAX - An integer who's sign represents equality. (pos => s1 > s2. neg => s1 < s2. zero => s1 == s2).
 
-        endbr64                                         ; Mark the start of a function for control flow integrity (CFI) protection.
-        xor         rax, rax                            ; Set RAX to 0 through XOR operation. Common string reading index and return value.
-        xor         rcx, rcx                            ; Set RCX to 0 through XOR operation. Temporary storage for discrepency index.
+ft_strcmp:
 
+    ; ft_strcmp initialization.
+        endbr64                                 ; AMD specific branch prediction hint.
+        push        rbp                         ; Push previous base pointer on top of stack.
+        mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
+
+        xor         rax, rax                    ; Set rax to 0 through XOR operation. Will be common string index and ultimately will contain the final result.
+        pxor        xmm5, xmm5                  ; Set xmm5 to 0 through XOR operation. It will be compared to, to find position of null-bytes.
+        pcmpeqb     xmm6, xmm6                  ; Fill xmm7 with 1 through comparison with itself. It will be used to reproduce NOT's behaviour with a XOR operation.
+
+    ; ft_strcmp start.
     .loop:
-        movdqu      xmm0, [rdi + rax]                   ; Store 16bytes (128bits) of RDI in XMM0. RAX is offset.
-        movdqu      xmm1, [rsi + rax]                   ; Store 16bytes (128bits) of RSI in XMM1. RAX is offset.
-        movdqu      xmm2, xmm0                          ; Copy XMM0 in XMM2.
-        movdqu      xmm3, xmm1                          ; Copy XMM1 in XMM3.
-        pxor        xmm4, xmm4                          ; Set XMM4 to 0 through XOR operation.
 
-        pcmpeqb     xmm0, xmm1                          ; Compare byte/byte XMM0 with XMM2. Common bytes are set to 0xFF (1), else 0x00 (0).
-                                                        ;   XMM0 now contains position of common bytes (as 1/0xFF) between XMM0 and XMM1.
+    ; Find null bytes.
+        movdqu      xmm0, [rdi + rax]           ; Move 16-bytes (128-bits) to xmm0. Accounting the address contained in rdi and the rax offset.
+        movdqu      xmm1, [rsi + rax]           ; Move 16-bytes (128-bits) to xmm1. Accounting the address contained in rsi and the rax offset.
+        pcmpeqb     xmm0, xmm5                  ; Compare xmm0 and xmm5 byte/byte. Result stored in xmm0. Common characters (null-bytes) are represented by 0xFF and discrepencies as 0x00.
+        pcmpeqb     xmm1, xmm5                  ; Compare xmm1 and xmm5 byte/byte. Result stored in xmm1. Common characters (null-bytes) are represented by 0xFF and discrepencies as 0x00.
+        por         xmm0, xmm1                  ; Merge xmm0 and xmm1. This merges together the positions of xmm0 and xmm1's null-bytes.
+        ; xmm0 now contains the position of null-bytes as 0xFF.
 
-        pcmpeqb     xmm2, xmm4                          ; Compare byte/byte XMM2 (XMM0's copy) with XMM4 (null). Common values are set to 0xFF (1), else 0x00 (0).
-                                                        ;   XMM2 now contains positions of XMM0's null bytes (as 1/0xFF).
-        pcmpeqb     xmm3, xmm4                          ; Compare byte/byte XMM3 (XMM1's copy) with XMM4 (null). Common values are set to 0xFF (1), else 0x00 (0).
-                                                        ;   XMM3 now contains positions of XMM0's null bytes (as 1/0xFF).
-        por         xmm2, xmm3                          ; Mix XMM2 and XMM3's 1/0xFF store them in XMM2 through OR operation.
-                                                        ;   XMM2 now contains the position of the null bytes of XMM0 and XMM1 (as 1/0xFF).
+        pmovmskb    ecx, xmm0                   ; Move MSB of xmm0's 16 bytes to cx (ecx's 16 lowest bytes). pmovmskb expects a 32 bit register but we'll use half of it.
+        tzcnt       cx, cx                      ; Count number of trailing zeros (valid characters/bytes before finding a null byte).
 
-        ; Execute XMM equivalent of NOT operation on XMM2.
-        pcmpeqb     xmm4, xmm4                          ; Fill XMM4 with 1 by comparison with itself.
-        pxor        xmm2, xmm4                          ; Perform NOT operation through XOR on a XMM4 (1 filled XMM).
-                                                        ;   xmm2 now contains the position of the valid characters, excluding null bytes,
-                                                        ;   of XMM0 and XMM1 (as 1/0xFF).
+    ; Find discrepent bytes.
+        movdqu      xmm1, [rdi + rax]           ; Move 16-bytes (128-bits) to xmm1. Accounting the address contained in rdi and the rax offset.
+        movdqu      xmm2, [rsi + rax]           ; Move 16-bytes (128-bits) to xmm2. Accounting the address contained in rsi and the rax offset.
+        pcmpeqb     xmm1, xmm2                  ; Compare xmm1 and xmm2 byte/byte. Result stored in xmm1. Common characters are represented by 0xFF and discrepencies as 0x00.
+        pxor        xmm1, xmm6                  ; Not xmm1 through XOR operation with xmm6 filled with ones.
+        ; xmm1 now contains the position of discrepent bytes as 0xFF.
 
-        pand        xmm0, xmm2                          ; AND operation on XMM0 and XMM2. Remove null bytes from XMM0.
-                                                        ;   XMM0 now contains the position of valid common bytes (as 1/0xFF) between original XMM0 and XMM1.
+        pmovmskb    edx, xmm1                   ; Move MSB of xmm1's 16 bytes to dx (edx's 16 lowest bytes). pmovmskb expects a 32 bit register but we'll use half of it.
+        tzcnt       dx, dx                      ; Count number of trailing zeros (valid characters/bytes before finding a discrepency).
 
-        pmovmskb    ecx, xmm0                           ; Store per byte MSB of XMM0 in ECX's 16 lowest bits.
-        not         ecx                                 ; Invert ECX's bits for usage with BSF.
-        tzcnt       ecx, ecx                            ; Count trailing zeros from LSB to MSB. It is faster than bsf.
+        cmp         dx, cx                      ; Compare cx and dx.
+        cmovl       cx, dx                      ; Store the smallest value in cx.
+        add         rax, rcx                    ; Add the smallest computed length (cx through rcx) to rax.
+        sub         rcx, 16                     ; Substitute 16 from rcx.
+        jz          .loop                       ; If 0, it means that no null bytes or discrepencies have been found. A new iteration of the loop is triggered by jump to .loop.
 
-        add         rax, rcx                            ; Add ECX (through RCX) to RGB.
-        cmp         ecx, 16                             ; Compare ECX to 16.
-        je          .loop                               ; Jump to .loop if equal.
+    ; Calculate output.
+        movzx       rcx, byte [rsi + rax]       ; Move byte in rcx and sign extend (s2's char/byte).
+        movzx       rax, byte [rdi + rax]       ; Move byte in rax and sign extend (s1's char/byte).
+        sub         rax, rcx                    ; Substitute rax with rcx.
 
-    .calc_output:
-        movzx       rcx, byte [rsi + rax]               ; Set in RCX target byte's value, padded with 0s.
-        movzx       rax, byte [rdi + rax]               ; Set in RAX target byte's value, padded with 0s.
-        sub         rax, rcx                            ; Substitute RAX with RCX.
-
-    .normalize_output:
+    ; Normalize output.
         test        rax, rax                            ; Check if RAX is 0.
         jz          .end                                ; If RAX is 0, jump to .end.
         mov         rax, 1                              ; Set RAX to 1.
@@ -59,6 +69,8 @@ global ft_strcmp                            ; Entry-point for linker.
         neg         rax                                 ; Negate RAX.
 
     .end:
-        ret                                             ; Return RAX.
+        pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.
+        ret                                     ; Return (by default expects the content of rax).
 
-; Should check out the pcmpistri instruction. Couldn't figure out a way to make it work exacly how I want it to.
+; This implementation of strlen has similar performances to the original clib strlen.
+; It supposedly follows conventions. At least those I know about. If not, do not hesitate to tell me.

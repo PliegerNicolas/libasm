@@ -35,7 +35,7 @@ ft_write:
 
     .end:
         pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.
-        ret                                     ; Return (by default expects the content of RAX).
+        ret                                     ; Return (by default expects the content of rax).
 
     .error:
         neg         rax                         ; Invert the negative error code returned by syscall.

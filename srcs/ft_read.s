@@ -9,7 +9,7 @@ section .text
     ; Function entry-point for linker.
     global  ft_read
 
-    ; Information on ft_write.
+    ; Information on ft_read.
         ; Arguments:
         ;   RDI - File discriptor to read from.
         ;   RSI - Pointer/address of buffer to write to.
@@ -19,12 +19,12 @@ section .text
 
 ft_read:
 
-    ; ft_write initialization.
+    ; ft_read initialization.
         endbr64                                 ; AMD specific branch prediction hint.
         push        rbp                         ; Push previous base pointer on top of stack.
         mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
 
-    ; ft_write start.
+    ; ft_read start.
         mov         rdi, rdi                    ; rdi is already set by passed argument.
         mov         rsi, rsi                    ; rsi is already set by passed argument.
         mov         rdx, rdx                    ; rdx is already set by passed argument.
@@ -35,7 +35,7 @@ ft_read:
 
     .end:
         pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.
-        ret                                     ; Return (by default expects the content of RAX).
+        ret                                     ; Return (by default expects the content of rax).
 
     .error:
         neg         rax                         ; Invert the negative error code returned by syscall.

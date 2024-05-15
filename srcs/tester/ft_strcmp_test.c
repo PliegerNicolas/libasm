@@ -75,11 +75,11 @@ static void	test_diff_size_unequal_strings()
 {
 	printf("%sTest_diff_Size_unequal_strings%s\n", GREEN, RESET_COLOR);
 
-	printf("%d | ", strcmp("Hello, world!", "Hello!"));						// 6
-	printf("%d\n", ft_strcmp("Hello, world!", "Hello!"));					// 6
+	printf("%d | ", strcmp("Hello, world!", "Hello!"));						// 5
+	printf("%d\n", ft_strcmp("Hello, world!", "Hello!"));					// 5
 
-	printf("%d | ", strcmp("Hello!", "Hello, world!"));						// 6
-	printf("%d\n", ft_strcmp("Hello!", "Hello, world!"));					// 6
+	printf("%d | ", strcmp("Hello!", "Hello, world!"));						// 5
+	printf("%d\n", ft_strcmp("Hello!", "Hello, world!"));					// 5
 
 	printf("%d | ", strcmp("Hello, woooooooooooooooooooooorld!", "Yo dude..."));	// 0
 	printf("%d\n", ft_strcmp("Hello, woooooooooooooooooooooorld!", "Yo dude..."));	// 0
