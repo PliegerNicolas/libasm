@@ -1,27 +1,44 @@
-align 16
-global ft_strlen                    ; entry-point for linker.
+section .text
+    ; Padding to align to 16 bytes.
+    align   16
 
-    ft_strlen:
+    ; External symbol declarations: start.
+    ; External symbol declarations: end.
+
+    ; Function entry-point for linker.
+    global  ft_strlen
+
+    ; Information on ft_strlen.
         ; Arguments:
-        ;   rdi - Pointer to start of null-terminated string.
+        ;   RDI - Pointer/Address to target null-terminated string (s) in memory.
         ; Returns:
-        ;   rax - Length of the string excluding null terminator.
+        ;   RAX - Contains the length of the string, null-byte excluded.
 
-        endbr64                         ; Mark the start of a function for control flow integrity (CFI) protection.
-        xor         rax, rax            ; Set RAX to 0 through XOR operation. Counter of valid bytes/chars an return value.
-        test        rdi, rdi            ; If RDI is set to NULL
-        jz          .end                ; Jump to .end
+ft_strlen:
 
-    .ft_strlen_loop:
-        movdqu      xmm0, [rdi + rax]   ; Move 16-bytes (128-bits) of dereferenced RSI to XMM0. Offset with RAX (already counted characters).
-        pcmpeqb     xmm1, xmm0          ; Compare byte/byte XMM0 with XMM1 and store result in XMM1. 0xFF is set if common character found, else 0x0.
-                                        ;   Now, XMM1 represents the null bytes of XMM0 at respective byte positions. 0xFF means 0x0. 0x0 means other.
-        pmovmskb    ecx, xmm1           ; Store MSB of each byte of XMM1 in ECX's lowest bits (CL). If ECX is 0, ZeroFlag is set.
-        or          ecx, 0xFFFF0000     ; Set the MSB of each byte of ECX to 1 to ensure bsf sets ECX to 16 if no 1 (0xFF) has been found.
-        tzcnt       ecx, ecx            ; Count trailing zeros from LSB to MSB. It is faster than bsf.
-        add         rax, rcx            ; Increment RAX with the result of bsf (ECX through RCX).
-        sub         rcx, 16             ; Remove 16 from ECX. If 0, it means 16 characters where counted.
-        jz          .ft_strlen_loop     ; If zero flag set, jump to .ft_strlen_loop.
+    .initialization:
+        endbr64                                 ; AMD specific branch prediction hint.
+        push        rbp                         ; Push previous base pointer on top of stack.
+        mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
+
+    ; ft_strlen start.
+        xor             rax, rax                ; Set rax to 0 througb XOR operation. It will contain the result and serve as offset (counter valid character bytes).
+        xor             rcx, rcx                ; set rcx to 0 through XOR operation.
+        pxor            xmm1, xmm1              ; Set xmm1 to 0 through XOR operation. It will be used compare it with xmm0 and check for null-bytes.
+
+    .loop:
+        movdqu          xmm0, [rdi + rax]       ; Move 16-bytes (128-bits) to XMM0. Accounting the address contained in RDI and the rax offset.
+        pcmpeqb         xmm1, xmm0              ; Compare byte per byte XMM0 with XMM1. If common byte found (null byte), set 0xFF else 0x00.
+        pmovmskb        ecx, xmm1               ; Move MSB of XMM1's 16 bytes to CX (ECX's 16 lowest bytes). pmovmskb expects a 32 bit register but we'll use half of it.
+        tzcnt           cx, cx                  ; Count until first found non null-byte from LSB to MSB in cx.
+        jnc             .end                    ; If carry-out flag not set, jump to .end. CF is et when tzcnt hits the end of cx.
+        add             rax, 16                 ; Add 16 bytes (length of XMM0).
+        jmp             .loop                   ; Jump unconditionally to .loop.
 
     .end:
-        ret
+        add         rax, rcx                    ; Add the remaining read bytes contained in rcx/cx to rax.
+        pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.
+        ret                                     ; Return (by default expects the content of RAX).
+
+; This implementation of ft_strlen has similar performances to the original clib strlen.
+; It supposedly follows conventions. At least those I know about. If not, do not hesitate to tell me.
