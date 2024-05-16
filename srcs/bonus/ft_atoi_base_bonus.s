@@ -24,7 +24,6 @@ ft_atoi_base:
     ; ft_atoi_base start.
 
     .end:
-        add         rax, rcx                    ; Add the remaining read bytes contained in rcx/cx to rax.
         pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.
         ret                                     ; Return (by default expects the content of rax).
 

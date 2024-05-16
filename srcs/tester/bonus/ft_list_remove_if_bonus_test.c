@@ -13,9 +13,11 @@
 #include "libasm.h"
 #include "libasm_tester.h"
 
-void    test_ft_list_remove_if()
+void    test_ft_list_remove_if(t_list *head)
 {
 	printf("%sTest_ft_list_remove_if%s\n", YELLOW, RESET_COLOR);
+
+   (void)head;
 
 	printf("\n");
 }

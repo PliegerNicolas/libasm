@@ -13,9 +13,13 @@
 #include "libasm.h"
 #include "libasm_tester.h"
 
-void    test_ft_list_push_front()
+void    test_ft_list_push_front(t_list *head)
 {
 	printf("%sTest_ft_list_push_front%s\n", YELLOW, RESET_COLOR);
+
+    int *data = generate_data(42);
+    ft_list_push_front(&head, data);
+    printf("%d\n", ft_list_size(head));
 
 	printf("\n");
 }

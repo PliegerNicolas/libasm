@@ -10,9 +10,9 @@ section .text
 
     ; Information on ft_list_size.
         ; Arguments:
-        ;
+        ;   RDI - Pointer/address to head-node of list.
         ; Returns:
-        ;   RAX -
+        ;   RAX - Length of list.
 
 ft_list_size:
 
@@ -21,7 +21,6 @@ ft_list_size:
         push        rbp                         ; Push previous base pointer on top of stack.
         mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
 
-
         xor         rax, rax                    ; Set rax to 0 through XOR operation. It will be the node counter.
 
     ; ft_list_size start.
@@ -29,8 +28,8 @@ ft_list_size:
         jz          .end                        ; If null byte, jump to .end directly (rax == 0).
 
     .loop:
-        inc         rax
-        mov         rdi, [rdi + 0x8]
+        inc         rax                         ; Increment the counter/rax by 1.
+        mov         rdi, [rdi + 0x8]            ; Retrieve content of list->next situated 8 bytes further.
         test        rdi, rdi                    ; Check if null-byte found.
         jnz         .loop                       ; If null-byte not found, jump to .loop.
 
