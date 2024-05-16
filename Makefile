@@ -51,11 +51,11 @@ ASM_SOURCES_NAMES			:=				ft_read \
 											ft_strlen \
 											ft_write \
 
-ASM_SOURCES_NAMES_BONUS		:=				ft_atoi_base \
-											ft_list_push_front \
-											ft_list_remove_if \
-											ft_list_size \
-											ft_list_sort \
+ASM_SOURCES_NAMES_BONUS		:=				bonus/ft_atoi_base_bonus \
+											bonus/ft_list_push_front_bonus \
+											bonus/ft_list_remove_if_bonus \
+											bonus/ft_list_size_bonus \
+											bonus/ft_list_sort_bonus \
 
 ifeq (bonus, $(filter bonus, $(MAKECMDGOALS)))
 	ASM_SOURCES_NAMES		+=				$(ASM_SOURCES_NAMES_BONUS)
@@ -66,13 +66,25 @@ ASM_SOURCES					:=				$(addsuffix $(ASM_EXTENSION), $(SORTED_ASM_SOURCES_NAMES))
 
 #* CC SOURCES *#
 
-CC_SOURCES_NAMES			:=				tester/main \
-											tester/ft_read_test \
+CC_SOURCES_NAMES			:=				tester/ft_read_test \
 											tester/ft_strcmp_test \
 											tester/ft_strcpy_test \
 											tester/ft_strdup_test \
 											tester/ft_strlen_test \
 											tester/ft_write_test \
+
+CC_SOURCES_NAMES_BONUS		:=				tester/bonus/ft_atoi_base_bonus_test \
+											tester/bonus/ft_list_push_front_bonus_test \
+											tester/bonus/ft_list_remove_if_bonus_test \
+											tester/bonus/ft_list_size_bonus_test \
+											tester/bonus/ft_list_sort_bonus_test \
+
+ifeq (bonus, $(filter bonus, $(MAKECMDGOALS)))
+	CC_SOURCES_NAMES		+=				$(CC_SOURCES_NAMES_BONUS)
+	CC_SOURCES_NAMES		+=				tester/bonus/main_bonus
+else
+	CC_SOURCES_NAMES		+=				tester/main
+endif
 
 SORTED_CC_SOURCES_NAMES		:=				$(sort $(CC_SOURCES_NAMES))
 CC_SOURCES					:=				$(addsuffix $(CC_EXTENSION), $(SORTED_CC_SOURCES_NAMES))
