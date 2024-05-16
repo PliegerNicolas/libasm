@@ -36,10 +36,10 @@ int     *generate_data(int nbr);
 void	print_list(t_list *head);
 t_list  *free_list(t_list *head);
 
-void    test_ft_atoi_base(t_list *head);
-void    test_ft_list_push_front(t_list *head);
-void    test_ft_list_remove_if(t_list *head);
-void    test_ft_list_size(t_list *head);
-void    test_ft_list_sort(t_list *head);
+void    test_ft_atoi_base(t_list **head);
+void    test_ft_list_push_front(t_list **head);
+void    test_ft_list_remove_if(t_list **head);
+void    test_ft_list_size(t_list **head);
+void    test_ft_list_sort(t_list **head);
 
 #endif

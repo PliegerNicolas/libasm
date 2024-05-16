@@ -88,21 +88,21 @@ int	main(void)
 	//test_ft_strcpy();
 	//test_ft_strdup();
 
-    t_list  *list = NULL;
+	t_list  *list = NULL;
 	int		*data = NULL;
 
-    for(int i = 0; i < 5; ++i)
+	for(int i = 0; i < 5; ++i)
 	{
 		data = generate_data(i);
-        list = push_node(list, data);
+		list = push_node(list, data);
 	}
 
-    // Bonus
-	test_ft_atoi_base(list);
-	test_ft_list_push_front(list);
-	test_ft_list_remove_if(list);
-	test_ft_list_size(list);
-	test_ft_list_sort(list);
+	// Bonus
+	test_ft_atoi_base(&list);
+	test_ft_list_push_front(&list);
+	test_ft_list_remove_if(&list);
+	test_ft_list_size(&list);
+	test_ft_list_sort(&list);
 
 	free_list(list);
 

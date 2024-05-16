@@ -13,7 +13,7 @@
 #include "libasm.h"
 #include "libasm_tester.h"
 
-void    test_ft_list_sort(t_list *head)
+void    test_ft_list_sort(t_list **head)
 {
 	printf("%sTest_ft_list_sort%s\n", YELLOW, RESET_COLOR);
 

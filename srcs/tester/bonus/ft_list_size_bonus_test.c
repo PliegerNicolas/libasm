@@ -13,12 +13,12 @@
 #include "libasm.h"
 #include "libasm_tester.h"
 
-void    test_ft_list_size(t_list *head)
+void    test_ft_list_size(t_list **head)
 {
 	printf("%sTest_ft_list_size%s\n", YELLOW, RESET_COLOR);
 
-    print_list(head);
-    printf("%d\n", ft_list_size(head));
+    print_list(*head);
+    printf("Length: %d\n", ft_list_size(*head));
 
 	printf("\n");
 }
