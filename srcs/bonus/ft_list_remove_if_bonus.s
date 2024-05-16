@@ -43,8 +43,34 @@ ft_list_remove_if:
 
     ; ft_list_remove_if start.
     .loop:
+        test        r10, r10                    ; Check if current-node(r10) is defined (not null/0x0).
+        jz          .end                        ; If current-node null/0x0, jump to .end. 
         mov         r9, [r10 + 0x8]             ; Store current-node(r10)->next in next-node(r9).
 
+    .compare:
+        ; cmp: { args: [rdi contains data, rsi data to compare to], ret: [rax is set to the comparison value as int] }
+        mov         rdi, [r10 + 0x0]            ; Store current-node(r10)'s data in rdi as requested by 'cmp'.
+        push        rsi                         ; Push rsi to stack to preserve it.
+        call        rdx                         ; Call 'cmp' function through it's stored pointer in rdx.
+        pop         rsi                         ; Restore rsi.
+        test        rax, rax                    ; Verify the output of 'cmp'.
+        jz          .equality_found             ; If rax is 0x0, it means an equality has been found between current-node(r10)->data and ref_data.
+        mov         r8, r10                     ; Move current-node(r10) to previous-node(r8).
+        mov         r10, r9                     ; move next-node(r9) to current-node(r10).
+        jmp         .loop                       ; Jump unconditionally to .loop.
+
+    .equality_found:
+        ; free_fct: { args: [rdi contains the data to free], ret: [rax is undefined] }
+        mov         rdi, [r10 + 0x0]            ; Move current-node(r10)->data to rdi as requested by 'free_fct'.
+        call        rcx                         ; Call 'free_fct' function through it's stored pointer in rcx.
+        test        r8, r8                      ; Check if previous-node(r8) is defined (not null/0x0).
+        jz          .update_head_node           ; If previous-node(r8) is null/0x0, link current-node(r9) to head-node(r11) instead.
+        mov         [r8 + 0x8], r9              ; Move next-node(r9) to previous-node(r8)->next.
+        jmp         .loop                       ; Jump to .loop unconditionally.
+
+    .update_head_node:
+        mov         [r11 + 0x8], r9             ; Move current-node(r9) to head-node(r11)->next.
+        jmp         .loop                       ; Jump to .loop unconditionally.
 
     .end:
         pop         rdi                         ; Restore rdi.
