@@ -29,8 +29,10 @@ ft_list_remove_if:
         test        rdi, rdi                    ; Verify if rdi is not null (0x0).
         jz          .return                     ; If zero flag set, jump to .return.
 
-        push        rbx                         ; Push rbx to stack to preserve it's data.
-        push        rdi                         ; push rdi to stack to preserve the dual pointer to the list.
+        push        rbx                         ; Push rbx to stack to preserve it's data (callee-saved).
+        push        r12                         ; Push r12 to stack to preserve the hold data (callee-saved).
+        push        r13                         ; Push r13 to stack to preserve the hold data (callee-saved).
+        push        rdi                         ; Push rdi to stack to preserve the dual pointer to the list.
 
         mov         rbx, rdi                    ; rbx holds the address of the dual pointer to the head node of the list.
 
@@ -38,8 +40,8 @@ ft_list_remove_if:
         mov         r10, [rdi]                  ; r10 holds the pointer to the current-node.
         xor         r9, r9                      ; Set r9 to 0x0 through XOR operation. r9 holds pointer to next-node. It doesn't exist yet at initialization.
         xor         r8, r8                      ; Set r8 to 0x0 through XOR operation. r8 holds pointer to previous-node. It doesn't exist yet at initialization.
-        mov         rdx, rdx                    ; rdx holds pointer to 'cmp' function.
-        mov         rcx, rcx                    ; rcx holds pointer to 'free_fct' function.
+        mov         r12, rdx                    ; r12 holds pointer to 'cmp' function.
+        mov         r13, rcx                    ; r13 holds pointer to 'free_fct' function.
 
     ; ft_list_remove_if start.
     .loop:
@@ -51,7 +53,7 @@ ft_list_remove_if:
         ; cmp: { args: [rdi contains data, rsi data to compare to], ret: [rax is set to the comparison value as int] }
         mov         rdi, [r10 + 0x0]            ; Store current-node(r10)'s data in rdi as requested by 'cmp'.
         push        rsi                         ; Push rsi to stack to preserve it.
-        call        rdx                         ; Call 'cmp' function through it's stored pointer in rdx.
+        call        r12                         ; Call 'cmp' function through it's stored pointer in r12.
         pop         rsi                         ; Restore rsi.
         test        rax, rax                    ; Verify the output of 'cmp'.
         jz          .equality_found             ; If rax is 0x0, it means an equality has been found between current-node(r10)->data and ref_data.
@@ -62,7 +64,7 @@ ft_list_remove_if:
     .equality_found:
         ; free_fct: { args: [rdi contains the data to free], ret: [rax is undefined] }
         mov         rdi, [r10 + 0x0]            ; Move current-node(r10)->data to rdi as requested by 'free_fct'.
-        call        rcx                         ; Call 'free_fct' function through it's stored pointer in rcx.
+        call        r13                         ; Call 'free_fct' function through it's stored pointer in r13.
         test        r8, r8                      ; Check if previous-node(r8) is defined (not null/0x0).
         jz          .update_head_node           ; If previous-node(r8) is null/0x0, link current-node(r9) to head-node(r11) instead.
         mov         [r8 + 0x8], r9              ; Move next-node(r9) to previous-node(r8)->next.
@@ -75,6 +77,8 @@ ft_list_remove_if:
     .end:
         pop         rdi                         ; Restore rdi.
         ; Set next head pointer in rdi: mov rdi, [head_ptr].
+        pop         r13                         ; Restore r13.
+        pop         r12                         ; Restore r12.
         pop         rbx                         ; Restore rbx.
     
     .return:
