@@ -12,3 +12,10 @@
 
 #include "libasm.h"
 #include "libasm_tester.h"
+
+void    test_ft_list_sort()
+{
+	printf("%sTest_ft_list_sort%s\n", YELLOW, RESET_COLOR);
+
+	printf("\n");
+}

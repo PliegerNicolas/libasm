@@ -12,3 +12,10 @@
 
 #include "libasm.h"
 #include "libasm_tester.h"
+
+void    test_ft_list_size()
+{
+	printf("%sTest_ft_list_size%s\n", YELLOW, RESET_COLOR);
+
+	printf("\n");
+}

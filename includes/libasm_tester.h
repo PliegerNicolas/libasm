@@ -31,5 +31,10 @@ void    test_ft_strlen();
 void    test_ft_write();
 
 // Bonus
+void    test_ft_atoi_base();
+void    test_ft_list_push_front();
+void    test_ft_list_remove_if();
+void    test_ft_list_size();
+void    test_ft_list_sort();
 
 #endif

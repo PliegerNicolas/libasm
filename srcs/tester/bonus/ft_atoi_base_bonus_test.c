@@ -12,3 +12,10 @@
 
 #include "libasm.h"
 #include "libasm_tester.h"
+
+void    test_ft_atoi_base()
+{
+	printf("%sTest_ft_atoi_base%s\n", YELLOW, RESET_COLOR);
+
+	printf("\n");
+}
