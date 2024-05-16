@@ -21,10 +21,20 @@ ft_list_size:
         push        rbp                         ; Push previous base pointer on top of stack.
         mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
 
+
+        xor         rax, rax                    ; Set rax to 0 through XOR operation. It will be the node counter.
+
     ; ft_list_size start.
+        test        rdi, rdi                    ; Verify if rdi is not a null byte (0x0).
+        jz          .end                        ; If null byte, jump to .end directly (rax == 0).
+
+    .loop:
+        inc         rax
+        mov         rdi, [rdi + 0x8]
+        test        rdi, rdi                    ; Check if null-byte found.
+        jnz         .loop                       ; If null-byte not found, jump to .loop.
 
     .end:
-        add         rax, rcx                    ; Add the remaining read bytes contained in rcx/cx to rax.
         pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.
         ret                                     ; Return (by default expects the content of rax).
 
