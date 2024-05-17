@@ -94,6 +94,11 @@ int	main(void)
 	for(int i = 0; i < 5; ++i)
 	{
 		data = generate_data(i);
+		if (!data)
+		{
+			free_list(list);
+			return (1);
+		}
 		list = push_node(list, data);
 	}
 

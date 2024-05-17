@@ -24,6 +24,11 @@ ft_list_push_front:
         push        rbp                         ; Push previous base pointer on top of stack.
         mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
 
+        test        rdi, rdi                    ; Check if rdi (dual-pointer to list's head-node) is 0x0/null.
+        jz          .end                        ; If zero flag set, jump to .end.
+        test        rsi, rsi                    ; Check if rsi (pointer to push front) is 0x0/null.
+        jz          .end                        ; If zero flag set, jump to .end.
+
     ; ft_list_push_front start.
         push        rdi
         push        rsi

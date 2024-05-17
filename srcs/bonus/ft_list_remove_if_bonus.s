@@ -27,6 +27,13 @@ ft_list_remove_if:
         push        rbp                         ; Push previous base pointer on top of stack.
         mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
 
+        test        rdi, rdi                    ; Check if rdi (dual-pointer to head-node) is 0x0 (null).
+        jz          .return                        ; If rdi (dual-pointer to head-node) is 0x0 (null), jump to .return.
+        test        rdx, rdx                    ; Check if rdx ('cmp' function ptr) is 0x0 (null).
+        jz          .return                        ; If rdx ('cmp' function ptr) is 0x0 (null), jump to .return.
+        test        rcx, rcx                    ; Check if rcx ('free_fct' function ptr) is 0x0 (null).
+        jz          .return                        ; If rcx ('free_fct' function ptr) is 0x0 (null), jump to .return.
+
         sub         rsp, 64                     ; Allocate 64 bytes in stack (8 bytes * 8).
         mov         [rbp - 24], rdi             ; Store dual-pointer to list's head-node. This will represent DUAL-PTR HEAD-NODE.
         mov         rax, [rdi]                  ; Store in rax dereferenced rdi.
@@ -40,9 +47,6 @@ ft_list_remove_if:
         mov         [rbp - 8], rcx              ; Store pointer to 'FREE_FCT' FUNCTION.
 
     ; ft_list_remove_if start.
-
-        test        rdi, rdi                    ; Check if rdi (dual-pointer to head-node) is 0x0 (null).
-        jz          .end                        ; If rdi (dual-pointer to head-node) is 0x0 (null), jump to .end.
 
     .loop:
         mov         rdi, [rbp - 56]             ; Store current-node in rdi.
@@ -91,8 +95,10 @@ ft_list_remove_if:
         mov         rcx, [rbp - 24]             ; Set rcx to dual-pointer to list's head-node.
         mov         rdi, [rbp - 64]             ; Set rdi to head-node.
         mov         [rcx], rdi                  ; Store head-node of list in at dereferenced rdi.
-        xor         rax, rax                    ; Set rax to 0. Function returns void so we set it at 0x0 (null).
         add         rsp, 64                     ; Liberate allocated 64 bytes from stack.
+
+    .return:
+        xor         rax, rax                    ; Set rax to 0. Function returns void so we set it at 0x0 (null).
         pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.
         ret                                     ; Return (by default expects the content of rax).
 
