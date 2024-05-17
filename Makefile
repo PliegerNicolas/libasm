@@ -26,7 +26,7 @@ CC							:=				gcc
 ASM							:=				nasm
 AR							:=				ar rcs
 
-CC_FLAGS					:=				-Wall -Wextra -Werror -g
+CC_FLAGS					:=				-Wall -Wextra -Werror -g3
 ASM_FLAGS					:=				-f elf64 -g
 
 LIBRARY_FLAGS				:=				-L. -lasm # -lasm looks for libasm.a file by convention

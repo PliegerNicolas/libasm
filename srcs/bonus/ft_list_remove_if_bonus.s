@@ -3,6 +3,7 @@ section .text
     align   16
 
     ; External symbol declarations: start.
+    extern  free
     ; External symbol declarations: end.
 
     ; Function entry-point for linker.
@@ -26,63 +27,72 @@ ft_list_remove_if:
         push        rbp                         ; Push previous base pointer on top of stack.
         mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
 
-        test        rdi, rdi                    ; Verify if rdi is not null (0x0).
-        jz          .return                     ; If zero flag set, jump to .return.
-
-        push        rbx                         ; Push rbx to stack to preserve it's data (callee-saved).
-        push        r12                         ; Push r12 to stack to preserve the hold data (callee-saved).
-        push        r13                         ; Push r13 to stack to preserve the hold data (callee-saved).
-        push        rdi                         ; Push rdi to stack to preserve the dual pointer to the list.
-
-        mov         rbx, rdi                    ; rbx holds the address of the dual pointer to the head node of the list.
-
-        mov         r11, [rdi]                  ; r11 holds the pointer to the head-node of the list.
-        mov         r10, [rdi]                  ; r10 holds the pointer to the current-node.
-        xor         r9, r9                      ; Set r9 to 0x0 through XOR operation. r9 holds pointer to next-node. It doesn't exist yet at initialization.
-        xor         r8, r8                      ; Set r8 to 0x0 through XOR operation. r8 holds pointer to previous-node. It doesn't exist yet at initialization.
-        mov         r12, rdx                    ; r12 holds pointer to 'cmp' function.
-        mov         r13, rcx                    ; r13 holds pointer to 'free_fct' function.
+        sub         rsp, 64                     ; Allocate 64 bytes in stack (8 bytes * 8).
+        mov         [rbp - 24], rdi             ; Store dual-pointer to list's head-node. This will represent DUAL-PTR HEAD-NODE.
+        mov         rax, [rdi]                  ; Store in rax dereferenced rdi.
+        mov         [rbp - 64], rax             ; Set to rax. This will represent HEAD-NODE. 
+        mov         [rbp - 56], rax             ; Set to rax. This will represent CURRENT-NODE.
+        mov         rax, [rax + 8]              ; Set rax to current-node->next ([rax + 8]).
+        mov         [rbp - 48], rax             ; Set to rax. This will represent NEXT-NODE.
+        mov         qword [rbp - 40], 0         ; Set to 0. This will represent PREVIOUS-NODE.
+        mov         [rbp - 32], rsi             ; Store pointer to REFERENCE_DATA.
+        mov         [rbp - 16], rdx             ; Store pointer to 'CMP' FUNCTION.
+        mov         [rbp - 8], rcx              ; Store pointer to 'FREE_FCT' FUNCTION.
 
     ; ft_list_remove_if start.
+
+        test        rdi, rdi                    ; Check if rdi (dual-pointer to head-node) is 0x0 (null).
+        jz          .end                        ; If rdi (dual-pointer to head-node) is 0x0 (null), jump to .end.
+
     .loop:
-        test        r10, r10                    ; Check if current-node(r10) is defined (not null/0x0).
-        jz          .end                        ; If current-node null/0x0, jump to .end. 
-        mov         r9, [r10 + 0x8]             ; Store current-node(r10)->next in next-node(r9).
+        mov         rdi, [rbp - 56]             ; Store current-node in rdi.
+        test        rdi, rdi                    ; Check if rdi (current-node) is 0 (null).
+        jz          .end                        ; If current-node is null (zero flag set), jump to .end.
+
+        mov         rsi, [rdi + 8]              ; Store in rsi current-node->next ([rdi + 8]).
+        mov         [rbp - 48], rsi             ; Store rsi (current-node->next) in next-node.
 
     .compare:
         ; cmp: { args: [rdi contains data, rsi data to compare to], ret: [rax is set to the comparison value as int] }
-        mov         rdi, [r10 + 0x0]            ; Store current-node(r10)'s data in rdi as requested by 'cmp'.
-        push        rsi                         ; Push rsi to stack to preserve it.
-        call        r12                         ; Call 'cmp' function through it's stored pointer in r12.
-        pop         rsi                         ; Restore rsi.
-        test        rax, rax                    ; Verify the output of 'cmp'.
-        jz          .equality_found             ; If rax is 0x0, it means an equality has been found between current-node(r10)->data and ref_data.
-        mov         r8, r10                     ; Move current-node(r10) to previous-node(r8).
-        mov         r10, r9                     ; move next-node(r9) to current-node(r10).
+        mov         rsi, [rdi + 0]              ; As rdi as previously been set to current-node ... Set rsi to current-node->data (rdi + 0).
+        mov         rdi, [rbp - 32]             ; Set rdi to reference_data.
+        call        [rbp - 16]                  ; Call 'cmp' function. /!\ This function call invalidates potentially every callee-saved register.
+        mov         rdi, [rbp - 56]             ; Set rdi to current-node.
+        test        rax, rax                    ; Check if rax is 0/null ('cmp's output). If rax is 0, we consider equality.
+        jz          .delete_node                ; If equality (zero flag set), jump to .delete_node.
+    
+    .next_node:
+        mov         [rbp - 40], rdi             ; Set previous-node to rdi (current-node).
+        mov         rdi, [rdi + 8]              ; Set rdi to current-node->next ([rdi + 8]).
+        mov         [rbp - 56], rdi             ; Set current-node to rdi (next-node).
         jmp         .loop                       ; Jump unconditionally to .loop.
 
-    .equality_found:
+    .delete_node:
         ; free_fct: { args: [rdi contains the data to free], ret: [rax is undefined] }
-        mov         rdi, [r10 + 0x0]            ; Move current-node(r10)->data to rdi as requested by 'free_fct'.
-        call        r13                         ; Call 'free_fct' function through it's stored pointer in r13.
-        test        r8, r8                      ; Check if previous-node(r8) is defined (not null/0x0).
-        jz          .update_head_node           ; If previous-node(r8) is null/0x0, link current-node(r9) to head-node(r11) instead.
-        mov         [r8 + 0x8], r9              ; Move next-node(r9) to previous-node(r8)->next.
-        jmp         .loop                       ; Jump to .loop unconditionally.
+        mov         rdi, [rdi + 0]              ; Set rdi to current-node->data (rdi + 0), as requested by 'free_fct'
+        call        [rbp - 8]                   ; Call 'free_fct'. /!\ This function call invalidates potentially every callee-saved register.
+        ; free: { args: [rdi contains the data to free], ret: [rax is undefined] }
+        mov         rdi, [rbp - 56]             ; Set rdi to current-node
+        call        free wrt ..plt              ; Call _free.
 
-    .update_head_node:
-        mov         [r11 + 0x8], r9             ; Move current-node(r9) to head-node(r11)->next.
-        jmp         .loop                       ; Jump to .loop unconditionally.
+        mov         rdi, [rbp - 48]             ; Set rdi to next-node.
+        mov         [rbp - 56], rdi             ; Set current-node to rdi (next-node).
+        mov         rsi, [rbp - 40]             ; Set rsi to previous-node.
+        test        rsi, rsi                    ; Check if previous-node is 0/null.
+        jz          .set_head_node              ; If previous-node is null (zero flag set), jump to .set_head_node.
+        mov         [rsi + 8], rdi              ; Set [rsi + 8] (previous-node->next) to rdi (current-node).
+        jmp         .loop                       ; Jump unconditionally to .loop.
+
+    .set_head_node:
+        mov         [rbp - 64], rdi             ; Set head-node to rdi (current-node).
+        jmp         .loop                       ; Jump unconditionally to .loop.
 
     .end:
-        pop         rdi                         ; Restore rdi.
-        ; Set next head pointer in rdi: mov rdi, [head_ptr].
-        pop         r13                         ; Restore r13.
-        pop         r12                         ; Restore r12.
-        pop         rbx                         ; Restore rbx.
-    
-    .return:
-        xor         rax, rax                    ; Set rax to 0x0 through XOR operation because function returns void.
+        mov         rcx, [rbp - 24]             ; Set rcx to dual-pointer to list's head-node.
+        mov         rdi, [rbp - 64]             ; Set rdi to head-node.
+        mov         [rcx], rdi                  ; Store head-node of list in at dereferenced rdi.
+        xor         rax, rax                    ; Set rax to 0. Function returns void so we set it at 0x0 (null).
+        add         rsp, 64                     ; Liberate allocated 64 bytes from stack.
         pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.
         ret                                     ; Return (by default expects the content of rax).
 
