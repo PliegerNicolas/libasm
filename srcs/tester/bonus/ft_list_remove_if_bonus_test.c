@@ -15,7 +15,7 @@
 
 /* Functions to pass as arguments */
 
-int		cmp(int *data, int *data_ref)
+static int	cmp(int *data, int *data_ref)
 {
 	if (!data && !data_ref)
 		return (0);
@@ -24,7 +24,7 @@ int		cmp(int *data, int *data_ref)
 	return (*data - *data_ref);
 }
 
-void	free_fct(void *data_ptr)
+static void	free_fct(void *data_ptr)
 {
 	if (data_ptr)
 		free(data_ptr);
