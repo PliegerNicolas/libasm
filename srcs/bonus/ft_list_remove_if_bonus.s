@@ -47,7 +47,6 @@ ft_list_remove_if:
         mov         [rbp - FREE_FCT_FNC], rcx   ; Set FREE_FCT_FUNCTION's pointer in stack through rcx.
 
     ; ft_list_remove_if start.
-
     .loop:
         mov         rdi, [rbp - CURR_NODE]      ; Store CURRENT_NODE in rdi.
         test        rdi, rdi                    ; Check if rdi (current-node) is 0 (null).
