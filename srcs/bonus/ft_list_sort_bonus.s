@@ -7,6 +7,7 @@ section .text
 
     ; Function entry-point for linker.
     global  ft_list_sort
+    global  ft_merge_sort
 
     ; Information on ft_list_sort.
         ; Arguments:
@@ -38,9 +39,6 @@ ft_list_sort:
         ret                                     ; Return (by default expects the content of rax).
 
 section .data
-    NODE_DATA       equ     0                   ; Shift to retrieve data's value from dereferenced node pointer.
-    NODE_NEXT       equ     8                   ; Shift to retrieve next's value from dereferenced node pointer.
-
     SRC_HEAD_NODE   equ     8                   ; Represents stack shift for the pointer that points to the original head-node.
     CMP_FNC         equ     16                  ; Represents stack shift for cmp function pointer.
 
@@ -72,12 +70,20 @@ ft_merge_sort:
         push        rbp                         ; Push previous base pointer on top of stack.
         mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
 
-    ; ft_merge_sort start.
+        test        rdi, rdi                    ; Check if rdi (current head-node) is 0x0 (null).
+        jz          .end                        ; If it is, jump to .end (recursive base case).
+        mov         rsi, [rdi + NODE_NEXT]
 
+    ; ft_merge_sort start.
+    .loop:
 
     .end:
         xor         rax, rax                    ; Set rax to 0 through XOR operation. Function returns null, so we return 0x0/null.
         pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.
         ret    
+
+section .data
+    NODE_DATA       equ     0                   ; Shift to retrieve data's value from dereferenced node pointer.
+    NODE_NEXT       equ     8                   ; Shift to retrieve next's value from dereferenced node pointer.
 
 ; It supposedly follows conventions. At least those I know about. If not, do not hesitate to tell me.
