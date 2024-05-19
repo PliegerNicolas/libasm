@@ -49,6 +49,13 @@ ft_list_sort:                                               ; This function is i
         lea         rdx, [rbp - 16]                         ; Set rdx to the effective address of right_half (equivalent of &right_half in c), as requested by 'ft_list_split'.
         call        ft_list_split                           ; Call 'ft_list_split'.
 
+        ; temp
+        mov         rdi, [rsi]
+        call        ft_list_split
+
+        mov         rdi, [rsi]
+        call        ft_list_split
+
         ; ft_list_sort: { args: [rdi = t_list **head-of-sublist, rsi = ptr/addr of 'cmp' function], ret: [rax is undefined] }
         ; ft_list_sort: { args: [rdi = t_list **head-of-sublist, rsi = ptr/addr of 'cmp' function], ret: [rax is undefined] }
         ; ft_list_merge: { args: [rdi = t_list *head-of-left-sublist, rsi = t_list *head-of-right-sublist, rdx = ptr/addr of 'cmp' function], ret: [rax is set to head-node of merged list] }
@@ -56,7 +63,7 @@ ft_list_sort:                                               ; This function is i
     .end:
         mov         rdi, [rbp - SRC_HEAD_NODE]              ; Restore original rdi (source-head-node).
         ; Pass to rdi value of current head-node.
-        xor         rax, rax                                ; Set rax to 0 through XOR operation. Function returns void so we set 0x0 (null).
+        ;xor         rax, rax                                ; Set rax to 0 through XOR operation. Function returns void so we set 0x0 (null).
         add         rsp, ALLOC_LIST                         ; Deallocate memory on stack.
         pop         rbp                                     ; Restore previous base pointer and remove it from the top of the stack.
         ret                                                 ; Return (by default expects the content of rax).
@@ -96,16 +103,21 @@ ft_list_split:
         mov         qword [rsp - BASE_CASE_REACHED], 0  ; Store in stack 0x0 as base-case reached status (by default: yes/0).
 
     ; Initial check.
-        test        rdi, rdi                            ; Check if source is 0x0 (null).
+        test        rdi, rdi                            ; Test if rdi (source) is 0x0 (null).
         jz          .end                                ; If zero flag set (if null), jump to .end.
-        mov         rax, [rdi + NODE_NEXT]              ; Move rax (source) forward (source->next).
-        test        rax, rax                            ; Check if source->next is 0x0 (null).
-        jz          .end                                ; If zero flag set (if null), jump to .end.
-        not         qword [rsp - BASE_CASE_REACHED]     ; Invert bits of base-case in stack (0 => -1).
 
-        mov         [rsp - SLOW_NODE], rax              ; Set slow-node to source->next.
-        mov         rax, [rax + NODE_NEXT]              ; Move rax forward (source->next->next).
-        mov         [rsp - FAST_NODE], rax              ; Set fast-node to source->next->next.
+        mov         rax, [rdi + NODE_NEXT]              ; Set rax to source->next.
+        test        rax, rax                            ; Test if rax (source->next) is 0x0 (null).
+        jz          .end                                ; If zero flag set (if null), jump to .end.
+
+        mov         [rsp - SLOW_NODE], rdi              ; Set slow-node to source (rdi).
+        mov         [rsp - FAST_NODE], rax              ; Set fast-node to rax (source->next)
+
+        mov         rax, [rax + NODE_NEXT]              ; Move rax forward a node (source->next->next)
+        test        rax, rax                            ; Test if rax (source->next->next) is 0x0 (null).
+        jz          .loop                               ; If zero flag set (if null), jump to .end.
+
+        not         qword [rsp - BASE_CASE_REACHED]     ; Invert bits of base-case in stack (0 => -1).
 
     ; ft_list_split start.
     .loop:
