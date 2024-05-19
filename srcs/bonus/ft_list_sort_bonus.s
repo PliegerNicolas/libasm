@@ -54,17 +54,23 @@ ft_list_sort:                                               ; This function is i
         jz          .merge                                  ; If rax is 0x0 (null), jump to .merge.
 
         ; ft_list_sort: { args: [rdi = t_list **head-of-sublist, rsi = ptr/addr of 'cmp' function], ret: [rax is undefined] }
-        mov         rdi, [rbp - LEFT_HALF]                  ; Set rdi to reference to left-half-node.
-        mov         rsi, [rbp - CMP_FNC]                    ; Set rsi to pointer to 'cmp' function.
+        mov         rdi, [rbp - LEFT_HALF]                  ; Set rdi to reference to left-half-node, as requested by 'ft_list_sort'.
+        mov         rsi, [rbp - CMP_FNC]                    ; Set rsi to pointer to 'cmp' function, as requested by 'ft_list_sort'.
         call        ft_list_sort                            ; Call 'ft_list_sort'.
 
         ; ft_list_sort: { args: [rdi = t_list **head-of-sublist, rsi = ptr/addr of 'cmp' function], ret: [rax is undefined] }
-        mov         rdi, [rbp - RIGHT_HALF]                 ; Set rdi to reference to right-half-node.
-        mov         rsi, [rbp - CMP_FNC]                    ; Set rsi to pointer to 'cmp' function.
+        mov         rdi, [rbp - RIGHT_HALF]                 ; Set rdi to reference to right-half-node, as requested by 'ft_list_sort'.
+        mov         rsi, [rbp - CMP_FNC]                    ; Set rsi to pointer to 'cmp' function, as requested by 'ft_list_sort'.
         call        ft_list_sort                            ; Call 'ft_list_sort'.
 
     .merge:
         ; ft_list_merge: { args: [rdi = t_list *head-of-left-sublist, rsi = t_list *head-of-right-sublist, rdx = ptr/addr of 'cmp' function], ret: [rax is set to head-node of merged list] }
+        mov         rdi, [rbp - LEFT_HALF]                  ; Set rdi to reference to left-half-node.
+        mov         rdi, [rdi]                              ; Dereference rdi to retrieve pointer to left_half_node, as requested by 'ft_list_merge'.
+        mov         rsi, [rbp - RIGHT_HALF]                 ; Set rsi to reference to right-half-node.
+        mov         rsi, [rsi]                              ; Dereference rsi to retrieve pointer to right_half_node, as requested by 'ft_list_merge'.
+        mov         rdx, [rbp - CMP_FNC]                    ; Set rdx to pointer to 'cmp' function, as requested by 'ft_list_sort', as requested by 'ft_list_merge'.
+        call        ft_list_merge                           ; Call 'ft_list_merge'.
 
     .end:
         mov         rdi, [rbp - SRC_HEAD_NODE]              ; Restore original rdi (source-head-node).
