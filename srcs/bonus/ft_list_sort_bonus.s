@@ -49,15 +49,21 @@ ft_list_sort:                                               ; This function is i
         lea         rdx, [rbp - 16]                         ; Set rdx to the effective address of right_half (equivalent of &right_half in c), as requested by 'ft_list_split'.
         call        ft_list_split                           ; Call 'ft_list_split'.
 
-        ; temp
-        mov         rdi, [rsi]
-        call        ft_list_split
-
-        mov         rdi, [rsi]
-        call        ft_list_split
+        ; Check if base-case reached.
+        test        rax, rax                                ; Check if rax is 0 (base-case reached).
+        jz          .merge                                  ; If rax is 0x0 (null), jump to .merge.
 
         ; ft_list_sort: { args: [rdi = t_list **head-of-sublist, rsi = ptr/addr of 'cmp' function], ret: [rax is undefined] }
+        mov         rdi, [rbp - LEFT_HALF]                  ; Set rdi to reference to left-half-node.
+        mov         rsi, [rbp - CMP_FNC]                    ; Set rsi to pointer to 'cmp' function.
+        call        ft_list_sort                            ; Call 'ft_list_sort'.
+
         ; ft_list_sort: { args: [rdi = t_list **head-of-sublist, rsi = ptr/addr of 'cmp' function], ret: [rax is undefined] }
+        mov         rdi, [rbp - RIGHT_HALF]                 ; Set rdi to reference to right-half-node.
+        mov         rsi, [rbp - CMP_FNC]                    ; Set rsi to pointer to 'cmp' function.
+        call        ft_list_sort                            ; Call 'ft_list_sort'.
+
+    .merge:
         ; ft_list_merge: { args: [rdi = t_list *head-of-left-sublist, rsi = t_list *head-of-right-sublist, rdx = ptr/addr of 'cmp' function], ret: [rax is set to head-node of merged list] }
 
     .end:
