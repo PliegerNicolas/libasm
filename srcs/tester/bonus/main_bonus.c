@@ -53,7 +53,10 @@ void	print_list(t_list *head)
 	printf("[");
 	while (current_node)
 	{
-		printf("%d", *((int*)(current_node->data)));
+		if (current_node->data)
+			printf("%d", *((int*)(current_node->data)));
+		else
+			printf("(null)");
 		if (current_node->next)
 			printf(", ");
 		current_node = current_node->next;
