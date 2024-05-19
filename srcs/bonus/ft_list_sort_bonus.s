@@ -46,8 +46,19 @@ ft_list_sort:                                       ; This function is intended 
         mov         rdi, [rdi]                      ; Dereference the source list (*begin_list).
         call        ft_list_split                   ; Call 'ft_list_split'.
 
+        mov         [rbp - LEFT_HALF], rsi          ; Store reference to left-half head-node in stack.
+        mov         [rbp - RIGHT_HALF], rdx         ; Store reference to left-half head-node in stack.
+
         ; ft_list_sort: { args: [rdi = t_list **head-of-sublist, rsi = ptr/addr of 'cmp' function], ret: [rax is undefined] }
+        ;mov         rdi, [rbp - LEFT_HALF]          ; Set rdi to reference to left-half head-node, as requested by 'ft_list_sort' for recursive calling.
+        ;mov         rsi, [rbp - CMP_FNC]            ; Set rsi to pointer to 'cmp' function, as requested by 'ft_list_sort'.
+        ;call        ft_list_sort                    ; Call ft_list_sort recursivly.
+
         ; ft_list_sort: { args: [rdi = t_list **head-of-sublist, rsi = ptr/addr of 'cmp' function], ret: [rax is undefined] }
+        ;mov         rdi, [rbp - RIGHT_HALF]         ; Set rdi to reference to left-half head-node, as requested by 'ft_list_sort' for recursive calling.
+        ;mov         rsi, [rbp - CMP_FNC]            ; Set rsi to pointer to 'cmp' function, as requested by 'ft_list_sort'.
+        ;call        ft_list_sort                    ; Call ft_list_sort recursivly.
+
         ; ft_list_merge: { args: [rdi = t_list *head-of-left-sublist, rsi = t_list *head-of-right-sublist, rdx = ptr/addr of 'cmp' function], ret: [rax is set to head-node of merged list] }
 
     .end:
@@ -119,15 +130,17 @@ ft_list_split:
     .end:
         mov         [rsi], rdi                      ; Store source in reference to left-half.
         mov         rax, [rsp - SLOW_NODE]          ; Set rax to slow-node.
-        mov         rax, [rax + NODE_NEXT]          ; Move rax (slow-node) forward once to retrieve the start node of the right-half.
-        mov         [rdx], rax                      ; Store slow-node in reference to right-half.
+        mov         rcx, [rax + NODE_NEXT]          ; Move rax (slow-node) forward once to retrieve the start node of the right-half and store it in rcx.
+        mov         qword [rax + NODE_NEXT], 0x0    ; Cut link between the two halves.
+        mov         [rdx], rcx                      ; Store slow-node in reference to right-half.
 
         ; temp tester.
-        ;mov         qword [rdi + NODE_DATA], 0x0
-        ;mov         qword [rax + NODE_DATA], 0x0
+        mov         qword [rdi + NODE_DATA], 0x0
+        mov         qword [rcx + NODE_DATA], 0x0
         ; temp
 
         add         rsp, ALLOC_SPLIT                ; Deallocate memory on stack.
+        xor         rax, rax                        ; Set rax to 0x0 through XOR operation as this function returns void.
         pop         rbp                             ; Restore previous base pointer and remove it from the top of the stack.
         ret                                         ; Return (by default expects the content of rax).
 
@@ -166,7 +179,9 @@ ft_list_merge:
         pop         rbp                             ; Restore previous base pointer and remove it from the top of the stack.
         ret                                         ; Return (by default expects the content of rax).
 
-
+;;; ; ================================================================ ; ;;;
+;;; ;                              data                                ; ;;;
+;;; ; ================================================================ ; ;;;
 
 section .data
     NODE_DATA           equ     0           ; Shift to retrieve data's value from dereferenced node pointer.
@@ -177,8 +192,8 @@ section .data
 
     CMP_FNC             equ     40          ; Stack shift for pointer to 'cmp' function.
     SRC_HEAD_NODE       equ     32          ; Stack shift for reference to pointer to source-head-node.
-    LEFT_HALF           equ     24          ; Stack shift to left-half-node pointer.
-    RIGHT_HALF          equ     16          ; Stack shift to right-half-node pointer.
+    LEFT_HALF           equ     24          ; Stack shift to reference to left-half-node pointer.
+    RIGHT_HALF          equ     16          ; Stack shift to reference to right-half-node pointer.
     HEAD_NODE           equ     8           ; Stack shift to head-node pointer.
 
     FAST_NODE           equ     8           ; Stack shift for fast-node for fast-slow floyd-warshall algorithm.
