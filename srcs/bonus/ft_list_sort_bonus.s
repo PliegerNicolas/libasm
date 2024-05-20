@@ -27,55 +27,45 @@ ft_list_sort:                                               ; This function is i
         mov         [rbp - CMP_FNC], rsi                    ; Store in stack the 'cmp' function pointer.
         mov         [rbp - SRC_HEAD_NODE], rdi              ; Store in stack reference to head-node (t_list **begin_list).
 
-        test        rdi, rdi                                ; Test if begin_list is 0x0 (null).
-        jz          .end                                    ; If begin_list is null, jump to .end.
+        test        rdi, rdi                                ; Check if rdi is 0x0 (null) through AND operation.
+        jz          .end                                    ; If zero flag set, jump to .end.
 
-        mov         rax, [rdi]                              ; Derefrence rdi (*begin_list) and store it in rax.
-        mov         [rbp - LEFT_HALF], rax                  ; Stores the address to the left half of the list.
-        mov         qword [rbp - RIGHT_HALF], 0x0           ; Stores the address to the right half of the list.
-        mov         [rbp - HEAD_NODE], rax                  ; Stores the pointer to the head of the list.
+        mov         rax, [rdi]                              ; Dereference rdi and store the result in rax: rax = *begin_list.
+        mov         [rbp - LEFT_HALF], rax                  ; Store *begin_list (rax) as left-half in stack.
+        mov         qword [rbp - RIGHT_HALF], 0x0           ; Set right-half as 0x0 (null) in stack for the time being.
 
-    ; ft_list_sort start.
-        ; Test for base case of recursive function.
-        test        rax, rax                                ; Test if *begin_list is 0x0 (null).
-        jz          .end                                    ; If *begin_list is null, jump to .end.
-        mov         rax, [rax + NODE_NEXT]                  ; Mode rax forward by one node ((*begin_list)->next).
-        test        rax, rax                                ; Test if next node is 0x0 (null).
-        jz          .end                                    ; If *begin_list is null, jump to .end.
-        
-        ; ft_list_split: { args: [rdi = t_list *source, rsi = t_list **left_half, rdx = t_list **right_half], ret: [rax is 0 (base-case reached)] }
-        mov         rdi, [rbp - HEAD_NODE]                  ; Set rdi to current head-node, as requested by 'ft_list_split'.
-        lea         rsi, [rbp - 24]                         ; Set rsi to the effective address of left_half (equivalent of &left_half in c), as requested by 'ft_list_split'.
-        lea         rdx, [rbp - 16]                         ; Set rdx to the effective address of right_half (equivalent of &right_half in c), as requested by 'ft_list_split'.
+    ; Recursivity: Check for base case ((*begin_list) == NULL || (*begin_list)->next == NULL). This means there are <= 1 nodes left.
+        test        rax, rax                                ; Check if rax (*begin_list) is 0x0 (null) through AND operation.
+        jz          .end                                    ; If zero flag set, jump to .end.
+        mov         rax, [rax + NODE_NEXT]                  ; Move rax one node forward (rax = (*begin_list)->next).
+        test        rax, rax                                ; Check if rax ((*begin_list)->next) is 0x0 (null) through AND operation.
+        jz          .end                                    ; If zero flag set, jump to .end.
+
+    ; ft_list_sort start.       
+        ; ft_list_split: { args: [rdi = t_list *source, rsi = t_list **left_half, rdx = t_list **right_half], ret: [rax is undefined] }
+        mov         rdi, [rbp - LEFT_HALF]                  ; Set rdi to *begin_list (has it has been stored in left-half). As requested by 'ft_list_split'.
+        lea         rsi, [rbp - LEFT_HALF]                  ; Load effective address of left-half (eq. to &left-half). As requested by 'ft_list_split'.
+        lea         rdx, [rbp - RIGHT_HALF]                 ; Load effective address of left-half (eq. to &right-half). As requested by 'ft_list_split'.
         call        ft_list_split                           ; Call 'ft_list_split'.
 
-        ; Check if base-case reached.
-        test        rax, rax                                ; Check if rax is 0 (base-case reached).
-        jz          .merge                                  ; If rax is 0x0 (null), jump to .merge.
+        mov         rdi, [rsi]
+        call        ft_list_split
+
+        mov         rdi, [rsi]
+        call        ft_list_split
+
+        mov         rdi, [rsi]
+        call        ft_list_split
+
+        mov        rdi, [rsi]
+        call        ft_list_split
 
         ; ft_list_sort: { args: [rdi = t_list **head-of-sublist, rsi = ptr/addr of 'cmp' function], ret: [rax is undefined] }
-        mov         rdi, [rbp - LEFT_HALF]                  ; Set rdi to reference to left-half-node, as requested by 'ft_list_sort'.
-        mov         rsi, [rbp - CMP_FNC]                    ; Set rsi to pointer to 'cmp' function, as requested by 'ft_list_sort'.
-        call        ft_list_sort                            ; Call 'ft_list_sort'.
-
         ; ft_list_sort: { args: [rdi = t_list **head-of-sublist, rsi = ptr/addr of 'cmp' function], ret: [rax is undefined] }
-        mov         rdi, [rbp - RIGHT_HALF]                 ; Set rdi to reference to right-half-node, as requested by 'ft_list_sort'.
-        mov         rsi, [rbp - CMP_FNC]                    ; Set rsi to pointer to 'cmp' function, as requested by 'ft_list_sort'.
-        call        ft_list_sort                            ; Call 'ft_list_sort'.
-
-    .merge:
         ; ft_list_merge: { args: [rdi = t_list *head-of-left-sublist, rsi = t_list *head-of-right-sublist, rdx = ptr/addr of 'cmp' function], ret: [rax is set to head-node of merged list] }
-        mov         rdi, [rbp - LEFT_HALF]                  ; Set rdi to reference to left-half-node.
-        mov         rdi, [rdi]                              ; Dereference rdi to retrieve pointer to left_half_node, as requested by 'ft_list_merge'.
-        mov         rsi, [rbp - RIGHT_HALF]                 ; Set rsi to reference to right-half-node.
-        mov         rsi, [rsi]                              ; Dereference rsi to retrieve pointer to right_half_node, as requested by 'ft_list_merge'.
-        mov         rdx, [rbp - CMP_FNC]                    ; Set rdx to pointer to 'cmp' function, as requested by 'ft_list_sort', as requested by 'ft_list_merge'.
-        call        ft_list_merge                           ; Call 'ft_list_merge'.
 
     .end:
-        mov         rdi, [rbp - SRC_HEAD_NODE]              ; Restore original rdi (source-head-node).
-        ; Pass to rdi value of current head-node.
-        ;xor         rax, rax                                ; Set rax to 0 through XOR operation. Function returns void so we set 0x0 (null).
+        ; ???
         add         rsp, ALLOC_LIST                         ; Deallocate memory on stack.
         pop         rbp                                     ; Restore previous base pointer and remove it from the top of the stack.
         ret                                                 ; Return (by default expects the content of rax).
@@ -96,9 +86,9 @@ section .text
 
     ; Information on ft_list_split.
         ; Arguments:
-        ;   RDI - Pointer/address to source (head-node of source list).
-        ;   RSI - Pointer/address to ptr/addr of head-node of left half.
-        ;   RDX - Pointer/address to ptr/addr of head-node of right half.
+        ;   RDI - Pointer/address to source head-node.
+        ;   RSI - Reference to pointer/address of left-half head-node. Present so ft_list_split can return the values through those pointers.
+        ;   RDX - Reference to pointer/address of right-half head-node. Present so ft_list_split can return the values through those pointers.
         ; Returns:
         ;   RAX - NULL
 
@@ -106,59 +96,61 @@ ft_list_split:
     ; ft_list_split initialization.
         endbr64                                         ; AMD specific branch prediction hint.
         push        rbp                                 ; Push previous base pointer on top of stack.
-        mov         rbp, rsp                            ; Setup base pointer to current top of the stack.
+        mov         rbp, rsp                            ; Setup base pointer to current top of the stack. 
 
     ; Allocate memory on stack for local variables.
         sub         rsp, ALLOC_SPLIT                    ; Allocate memory on stack.
-        mov         [rsp - FAST_NODE], rdi              ; Store in stack source as fast-node.
-        mov         qword [rsp - SLOW_NODE], 0          ; Store in stack 0x0 as slow-node.
-        mov         qword [rsp - BASE_CASE_REACHED], 0  ; Store in stack 0x0 as base-case reached status (by default: yes/0).
+        mov         [rsp - FAST_NODE], rdi              ; Set fast-node in stack as source.
+        mov         qword [rsp - SLOW_NODE], 0x0        ; Set slow-node in stack as source.
 
-    ; Initial check.
-        test        rdi, rdi                            ; Test if rdi (source) is 0x0 (null).
-        jz          .end                                ; If zero flag set (if null), jump to .end.
+        mov         [rsi], rdi                          ; Set *left-half to source systematically.
 
-        mov         rax, [rdi + NODE_NEXT]              ; Set rax to source->next.
-        test        rax, rax                            ; Test if rax (source->next) is 0x0 (null).
-        jz          .end                                ; If zero flag set (if null), jump to .end.
+    ; Check for base-case
+        test        rdi, rdi                            ; Check if rdi (source) is 0x0 (null) through AND operation.
+        jz          .return                             ; If zero flag set, jump to .end.
 
-        mov         [rsp - SLOW_NODE], rdi              ; Set slow-node to source (rdi).
-        mov         [rsp - FAST_NODE], rax              ; Set fast-node to rax (source->next)
-
-        mov         rax, [rax + NODE_NEXT]              ; Move rax forward a node (source->next->next)
-        test        rax, rax                            ; Test if rax (source->next->next) is 0x0 (null).
-        jz          .loop                               ; If zero flag set (if null), jump to .end.
-
-        not         qword [rsp - BASE_CASE_REACHED]     ; Invert bits of base-case in stack (0 => -1).
+        mov         rax, [rdi + NODE_NEXT]              ; Move rdi one node forward (rax = source->next).
+        test        rax, rax                            ; Check if rax (source->next) is 0x0 (null) through AND operation.
+        jz          .return                             ; If zero flag set, jump to .end.
 
     ; ft_list_split start.
+        mov         [rsp - FAST_NODE], rax
+        mov         [rsp - SLOW_NODE], rdi              ; Set slow-node to source in stack. At this point slow and fast nodes are == source.
+
     .loop:
-        ; Move fast-node forward.
-        mov         rax, [rsp - FAST_NODE]              ; Set rax to current fast-node.
-        test        rax, rax                            ; Check if current fast-node == 0x0 (null).
-        jz          .end                                ; If zero flag set (if null), jump to .end.
-        mov         rax, [rax + NODE_NEXT]              ; Move current fast-node forward (fast-node->next).
-        test        rax, rax                            ; Check if current fast-node->next == 0x0 (null).
-        jz          .end                                ; If zero flag set (if null), jump to .end.
-        mov         rax, [rax + NODE_NEXT]              ; Move current fast-node forward (fast-node->next->next).
-        mov         [rsp - FAST_NODE], rax              ; Update fast-node.
+        ; Move fast-node forward
+        mov         rax, [rsp - FAST_NODE]              ; Retrieve current fast-node from stack.
+        test        rax, rax                            ; Check if current fast-node is 0x0 (null).
+        jz          .end                                ; If zero flag set, jump to .end.
+        mov         rax, [rax + NODE_NEXT]              ; Move fast-node forward by one node (fast-node = fast-node->next).
+        test        rax, rax                            ; Check if current fast-node->next is 0x0 (null).
+        jz          .end                                ; If zero flag set, jump to .end.
+        mov         rax, [rax + NODE_NEXT]              ; Move fast-node forward by one node (fast-node = fast-node->next->next).
+        mov         [rsp - FAST_NODE], rax              ; Update fast-node in stack.
 
         ; Move slow-node forward.
-        mov         rax, [rsp - SLOW_NODE]              ; Set rax to current slow-node.
-        mov         rax, [rax + NODE_NEXT]              ; Move current slow-node forward.
-        mov         [rsp - SLOW_NODE], rax              ; Update slow-node.
+        mov         rax, [rsp - SLOW_NODE]              ; Retrieve current slow-node from stack.
+        mov         rax, [rax + NODE_NEXT]              ; Move it one node forward (slow-node = slow-node->next) unconditionally.
+                                                        ;   At initialization source existance is already checked. Else fast-node handles checks.
+        mov         [rsp - SLOW_NODE], rax              ; Update slow-node in stack.
 
         jmp         .loop                               ; Jump unconditionally to .loop.
 
     .end:
-        ; Setup return values.
-        mov         [rsi], rdi                          ; Set reference to left-half (*left-half) to source.
+        mov         rcx, [rsp - SLOW_NODE]              ; Set rcx to slow-node.
+        mov         rax, rcx                            ; Copy rcx to rax.
+        mov         rax, [rax + NODE_NEXT]              ; Move rax forward (rax = slow-node->next).
+        mov         qword [rcx + NODE_NEXT], 0x0        ; Remove reference to slow-node->next from slow-node, setting slow-node->next to 0x0 (null). Slow-node->next's ptr is preserved in rax.
+        mov         [rsp - SLOW_NODE], rax              ; Update slow-node with rax, the preserve slow-node->next ptr.
+
+        ; Set data to null for testing purpose.
+        ;mov         qword [rax + NODE_DATA], 0x0
+        ;mov         qword [rdi + NODE_DATA], 0x0
+
+    .return:
+        ;           [rsi], source                       ; It has already been set earlier to source. Cheers mate.
         mov         rax, [rsp - SLOW_NODE]              ; Set rax to current slow-node.
-        mov         rcx, rax                            ; Copy slow-node (rax) to rcx.
-        mov         rcx, [rcx + NODE_NEXT]              ; Move rcx forward (slow-node->next).
-        mov         qword [rax + NODE_NEXT], 0          ; Set slow-node->next to 0x0 (null) to break link between left-half and right-half.
-        mov         [rdx], rcx                          ; Set reference to right-half (*right-half) to rcx (slow-node->next).
-        mov         rax, [rsp - BASE_CASE_REACHED]      ; Set rax to base-case status.
+        mov         [rdx], rax                          ; Set *right-half to current slow-node.
 
         add         rsp, ALLOC_SPLIT                    ; Deallocate memory on stack.
         pop         rbp                                 ; Restore previous base pointer and remove it from the top of the stack.
@@ -207,15 +199,13 @@ section .data
     NODE_DATA           equ     0           ; Shift to retrieve data's value from dereferenced node pointer.
     NODE_NEXT           equ     8           ; Shift to retrieve next's value from dereferenced node pointer.
 
-    ALLOC_LIST          equ     48          ; Bytes to allocate for ft_list_sort.
-    ALLOC_SPLIT         equ     24          ; Bytes to allocate for ft_list_split.
+    ALLOC_LIST          equ     32          ; Bytes to allocate for ft_list_sort.
+    ALLOC_SPLIT         equ     16          ; Bytes to allocate for ft_list_split.
 
-    CMP_FNC             equ     40          ; Stack shift for pointer to 'cmp' function.
-    SRC_HEAD_NODE       equ     32          ; Stack shift for reference to pointer to source-head-node.
-    LEFT_HALF           equ     24          ; Stack shift to reference to left-half-node pointer.
-    RIGHT_HALF          equ     16          ; Stack shift to reference to right-half-node pointer.
-    HEAD_NODE           equ     8           ; Stack shift to head-node pointer.
+    CMP_FNC             equ     32          ; Stack shift for pointer to 'cmp' function.
+    SRC_HEAD_NODE       equ     24          ; Stack shift for reference to pointer to source-head-node.
+    LEFT_HALF           equ     16          ; Stack shift to left-half-node pointer.
+    RIGHT_HALF          equ     8           ; Stack shift to right-half-node pointer.
 
     FAST_NODE           equ     8           ; Stack shift for fast-node for fast-slow floyd-warshall algorithm.
     SLOW_NODE           equ     16          ; Stack shift for fast-node for fast-slow floyd-warshall algorithm.
-    BASE_CASE_REACHED   equ     24          ; Stack shift for ft_list_split output (status if base case has been reached or not).
