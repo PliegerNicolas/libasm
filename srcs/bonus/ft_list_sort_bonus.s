@@ -48,15 +48,28 @@ ft_list_sort:                                               ; This function is i
         lea         rdx, [rbp - RIGHT_HALF]                 ; Load effective address of left-half (eq. to &right-half). As requested by 'ft_list_split'.
         call        ft_list_split                           ; Call 'ft_list_split'.
 
+        mov         rax, [rsi]                              ; Retrieve pointer contained in rsi (*left_half).
+        mov         [rbp - LEFT_HALF], rax                  ; Update left-half's head-node pointer.
+        mov         rax, [rdx]                              ; Retrieve pointer contained in rdx (*right_half).
+        mov         [rbp - RIGHT_HALF], rax                 ; Update right-half's head-node pointer.
+
         ; ft_list_sort: { args: [rdi = t_list **head-of-sublist, rsi = ptr/addr of 'cmp' function], ret: [rax is undefined] }
+        lea         rdi, [rbp - LEFT_HALF]                  ; Load effective address of left-half (eq. &left-half) to rdi. As requested by 'ft_list_sort'.
+        mov         rsi, [rbp - CMP_FNC]                    ; Set rsi to pointer to cmp function. As requested by 'ft_sit_sort'.
+        call        ft_list_sort                            ; Call recursivly 'ft_list_sort'.
+
         ; ft_list_sort: { args: [rdi = t_list **head-of-sublist, rsi = ptr/addr of 'cmp' function], ret: [rax is undefined] }
+        lea         rdi, [rbp - RIGHT_HALF]                 ; Load effective address of right-half (eq. &right-half) to rdi. As requested by 'ft_list_sort'.
+        mov         rsi, [rbp - CMP_FNC]                    ; Set rsi to pointer to cmp function. As requested by 'ft_sit_sort'.
+        call        ft_list_sort                            ; Call recursivly 'ft_list_sort'.
+
         ; ft_list_merge: { args: [rdi = t_list *head-of-left-sublist, rsi = t_list *head-of-right-sublist, rdx = ptr/addr of 'cmp' function], ret: [rax is set to head-node of merged list] }
 
     .end:
         ; TEMP
-        mov         rdi, [rbp - SRC_HEAD_NODE]              ; Restore rdi to source-head-node.
-        mov         rax, [rsi]                              ; merge will return ptr in rax so this line is not usefull.
-        mov         [rdi], rax
+        ;mov         rdi, [rbp - SRC_HEAD_NODE]              ; Restore rdi to source-head-node.
+        ;mov         rax, [rsi]                              ; merge will return ptr in rax so this line is not usefull.
+        ;mov         [rdi], rax
         ; TEMP
 
         add         rsp, ALLOC_LIST                         ; Deallocate memory on stack.
