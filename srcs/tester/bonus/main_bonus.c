@@ -64,6 +64,24 @@ void	print_list(t_list *head)
 	printf("]\n");
 }
 
+void	print_list_ptrs(t_list *head)
+{
+	t_list	*current_node = head;
+
+	printf("[");
+	while (current_node)
+	{
+		if (current_node->data)
+			printf("%p", current_node);
+		else
+			printf("(null)");
+		if (current_node->next)
+			printf(", ");
+		current_node = current_node->next;
+	}
+	printf("]\n");
+}
+
 t_list  *free_list(t_list *head)
 {
     t_list  *current_node = head;
@@ -96,7 +114,7 @@ int	main(void)
 
 	srand(time(NULL));
 
-	for(int i = 0; i < 10; ++i)
+	for(int i = 0; i < 5; ++i)
 	{
 		data = generate_data(rand() % 100);
 		if (!data)

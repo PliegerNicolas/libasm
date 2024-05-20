@@ -31,6 +31,7 @@ void    test_ft_list_sort(t_list **head)
 	printf("%sTest_ft_list_sort%s\n", YELLOW, RESET_COLOR);
 
 	print_list(*head);
+	//print_list_ptrs(*head);
 	ft_list_sort(head, cmp);
 	print_list(*head);
 

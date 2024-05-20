@@ -35,6 +35,7 @@ void    test_ft_write();
 t_list  *push_node(t_list *head, void *new_data);
 int     *generate_data(int nbr);
 void	print_list(t_list *head);
+void	print_list_ptrs(t_list *head);
 t_list  *free_list(t_list *head);
 
 void    test_ft_atoi_base(t_list **head);
