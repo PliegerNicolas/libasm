@@ -21,6 +21,7 @@
 
 # include <time.h>
 # include <bits/time.h>
+# include <stdlib.h>
 
 // Mandatory
 void    test_ft_read();

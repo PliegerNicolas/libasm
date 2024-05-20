@@ -94,14 +94,13 @@ int	main(void)
 	t_list  *list = NULL;
 	int		*data = NULL;
 
-	for(int i = 0; i < 5; ++i)
+	srand(time(NULL));
+
+	for(int i = 0; i < 10; ++i)
 	{
-		data = generate_data(i);
+		data = generate_data(rand() % 100);
 		if (!data)
-		{
-			free_list(list);
-			return (1);
-		}
+			return (free_list(list), 1);
 		list = push_node(list, data);
 	}
 
@@ -112,7 +111,5 @@ int	main(void)
 	test_ft_list_size(&list);
 	test_ft_list_sort(&list);
 
-	free_list(list);
-
-	return (0);
+	return (free_list(list), 0);
 }

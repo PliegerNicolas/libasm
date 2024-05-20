@@ -64,14 +64,16 @@ ft_list_sort:                                               ; This function is i
         call        ft_list_sort                            ; Call recursivly 'ft_list_sort'.
 
         ; ft_list_merge: { args: [rdi = t_list *head-of-left-sublist, rsi = t_list *head-of-right-sublist, rdx = ptr/addr of 'cmp' function], ret: [rax is set to head-node of merged list] }
+        mov         rdi, [rbp - LEFT_HALF]                  ; Set rdi to left-half head-node, as requested by 'ft_list_merge'.
+        mov         rsi, [rbp - RIGHT_HALF]                 ; Set rsi to right-half head-node, as requested by 'ft_list_merge'.
+        mov         rdx, [rbp - CMP_FNC]                    ; Set rdx to 'cmp' function pointer, as requested by 'ft_list_merge'.
+        call        ft_list_merge                           ; Call 'ft_list_merge'.
+
+        mov         rdi, [rbp - SRC_HEAD_NODE]              ; Restore source head-node.
+        mov         [rdi], rax                              ; Set the new head node returned by ft_list_merge.
 
     .end:
-        ; TEMP
-        ;mov         rdi, [rbp - SRC_HEAD_NODE]              ; Restore rdi to source-head-node.
-        ;mov         rax, [rsi]                              ; merge will return ptr in rax so this line is not usefull.
-        ;mov         [rdi], rax
-        ; TEMP
-
+        xor         rax, rax                                ; Set rax to 0 through XOR operation. Function returns void so we set 0x0 (null).
         add         rsp, ALLOC_LIST                         ; Deallocate memory on stack.
         pop         rbp                                     ; Restore previous base pointer and remove it from the top of the stack.
         ret                                                 ; Return (by default expects the content of rax).
@@ -191,10 +193,56 @@ ft_list_merge:
         push        rbp                                 ; Push previous base pointer on top of stack.
         mov         rbp, rsp                            ; Setup base pointer to current top of the stack.
 
-    ; ft_list_merge start.
+    ; Allocate memory on stack for local variables. This function is intended for recursivity. /!\ Possibility of stack overflow. Careful.
+        sub         rsp, ALLOC_MERGE                    ; Allocate memory on stack.
+        mov         [rbp - CMP_FNC], rdx                ; Store in stack the 'cmp' function pointer.
+        mov         [rbp - LEFT_HALF], rdi              ; Store in stack left head-node. Set it to source (rdi).
+        mov         qword [rbp - RIGHT_HALF], rsi       ; Store in stack right head-node. Set it to source (rsi).
 
+    ; ft_list_merge start.
+        ; Check base-case.
+        mov         rax, rsi                            ; Set rax to right-half (rsi). As it is the return value if the next condition is met.
+        test        rdi, rdi                            ; Check if left-half is 0x0 (null).
+        jz          .end                                ; If zero flag set, jump to .end. Rax has previously been set.
+
+        mov         rax, rdi                            ; Set rax to left-half (rdi). As it is the return value if the next condition is met.
+        test        rsi, rsi                            ; Check if right-half is 0x0 (null).
+        jz          .end                                ; If zero flag si set, jump to .end. Rax has previously been set.
+
+    ; cmp: { args: [rdi = void *left-data, rsi = void *right-data], ret: [rax is set 0 if equality. Positive means rdi > rsi, else negative] }
+        mov         rdi, [rdi + NODE_DATA]              ; Set rdi to left-half->data.
+        mov         rsi, [rsi + NODE_DATA]              ; Set rsi to right-half->data.
+        call        rdx                                 ; Call 'cmp' function pointer contained in rdx.
+    
+        mov         rdi, [rbp - LEFT_HALF]              ; Restore left-half to rdi.
+        mov         rsi, [rbp - RIGHT_HALF]             ; Restore right-half to rsi.
+        mov         rdx, [rbp - CMP_FNC]                ; Restore 'cmp' function pointer to rdx.
+
+        cmp         rax, 0                              ; Compare rax with 0.
+        jg          .greater                            ; If rax > 0, jump to .greater.
+
+    .lower_or_equal:
+        mov         [rbp - RET_HOLD], rsi               ; Store right-half in stack to preserve it.
+        mov         rsi, [rsi + NODE_NEXT]              ; Move right-half one node forward (right-half->next)
+        jmp         .merge                              ; Jump to merge unconditionally.
+
+    .greater:
+        mov         [rbp - RET_HOLD], rdi               ; Store left-half in stack to preserve it.
+        mov         rdi, [rdi + NODE_NEXT]              ; Move left-half one node forward (left-half->next)
+
+    .merge:
+    ; ft_list_merge: { args: [rdi = t_list *head-of-left-sublist, rsi = t_list *head-of-right-sublist, rdx = ptr/addr of 'cmp' function], ret: [rax is set to head-node of merged list] }
+        ;mov        rdi, rdi                            ; rdi is already set previously, as requested by 'ft_list_merge'.
+        ;mov        rsi, rsi                            ; rsi is already set previously, as requested by 'ft_list_merge'.
+        ;mov        rdx, rdx                            ; rdx is already set previously, as requested by 'ft_list_merge'.
+        call        ft_list_merge                       ; Call 'ft_list_merge' recursivly.
+
+        mov         rdi, [rbp - RET_HOLD]
+        mov         [rdi + NODE_NEXT], rax
+        mov         rax, rdi
+ 
     .end:
-        xor         rax, rax                            ; Set rax to 0 through XOR operation. Function returns null, so we return 0x0/null.
+        add         rsp, ALLOC_MERGE                    ; Deallocate memory on stack.
         pop         rbp                                 ; Restore previous base pointer and remove it from the top of the stack.
         ret                                             ; Return (by default expects the content of rax).
 
@@ -207,12 +255,14 @@ section .data
     NODE_NEXT           equ     8           ; Shift to retrieve next's value from dereferenced node pointer.
 
     ALLOC_LIST          equ     32          ; Bytes to allocate for ft_list_sort.
-    ALLOC_SPLIT         equ     16          ; Bytes to allocate for ft_list_split.
-
     CMP_FNC             equ     32          ; Stack shift for pointer to 'cmp' function.
     SRC_HEAD_NODE       equ     24          ; Stack shift for reference to pointer to source-head-node.
     LEFT_HALF           equ     16          ; Stack shift to left-half-node pointer.
     RIGHT_HALF          equ     8           ; Stack shift to right-half-node pointer.
 
+    ALLOC_SPLIT         equ     16          ; Bytes to allocate for ft_list_split.
     FAST_NODE           equ     8           ; Stack shift for fast-node for fast-slow floyd-warshall algorithm.
     SLOW_NODE           equ     16          ; Stack shift for fast-node for fast-slow floyd-warshall algorithm.
+
+    ALLOC_MERGE         equ     32          ; Bytes to allocate for ft_list_merge.
+    RET_HOLD            equ     32          ; Stack shift for return value.
