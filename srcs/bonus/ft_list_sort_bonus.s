@@ -53,7 +53,12 @@ ft_list_sort:                                               ; This function is i
         ; ft_list_merge: { args: [rdi = t_list *head-of-left-sublist, rsi = t_list *head-of-right-sublist, rdx = ptr/addr of 'cmp' function], ret: [rax is set to head-node of merged list] }
 
     .end:
-        ; ???
+        ; TEMP
+        mov         rdi, [rbp - SRC_HEAD_NODE]              ; Restore rdi to source-head-node.
+        mov         rax, [rsi]                              ; merge will return ptr in rax so this line is not usefull.
+        mov         [rdi], rax
+        ; TEMP
+
         add         rsp, ALLOC_LIST                         ; Deallocate memory on stack.
         pop         rbp                                     ; Restore previous base pointer and remove it from the top of the stack.
         ret                                                 ; Return (by default expects the content of rax).
