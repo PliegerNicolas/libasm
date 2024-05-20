@@ -70,13 +70,13 @@ ft_list_sort:                                               ; This function is i
 
     ; Merge  ... ??
         ; ft_list_merge: { args: [rdi = t_list *left_half, rsi = t_list *right_half, rdx = ptr/addr of 'cmp' function], ret: [rax is set to head-node of merged list] }
-        ;mov         rdi, [rbp - LEFT_HALF]                  ; Set rdi to left_half as requested by ft_list_merge.
-        ;mov         rsi, [rbp - RIGHT_HALF]                 ; Set rsi to right_half as requested by ft_list_merge.
-        ;mov         rdx, [rbp - CMP_FUNC]                   ; Set rdx to 'cmp' function pointer as requested by ft_list_merge.
-        ;call        ft_list_merge                           ; Call 'ft_list_merge'.            
+        mov         rdi, [rbp - LEFT_HALF]                  ; Set rdi to left_half as requested by ft_list_merge.
+        mov         rsi, [rbp - RIGHT_HALF]                 ; Set rsi to right_half as requested by ft_list_merge.
+        mov         rdx, [rbp - CMP_FUNC]                   ; Set rdx to 'cmp' function pointer as requested by ft_list_merge.
+        call        ft_list_merge                           ; Call 'ft_list_merge'.            
 
         mov         rdi, [rbp - BEGIN_LIST]                 ; Restore begin_list to rdi.
-        ;mov         [rdi], rax                              ; Make rdi reference return value of ft_list_merge.
+        mov         [rdi], rax                              ; Make rdi reference return value of ft_list_merge.
 
     .end:
         add         rsp, ALLOC_LIST                         ; Deallocate memory on stack.
@@ -157,7 +157,7 @@ ft_list_split:
         mov         rcx, rax                                ; Copy rax in rcx: rcx = rax = slow.
         mov         rax, [rax + NODE_NEXT]                  ; Move rax one node forward: rax = slow->next.
         mov         [rdx], rax                              ; Set *right_half to rax : *right_half = slow->next.
-        mov         qword [rcx + NODE_NEXT], 0             ; Break the link between the two halfs: slow->next = null.
+        mov         qword [rcx + NODE_NEXT], 0              ; Break the link between the two halfs: slow->next = null.
 
         ; Temp for testing purpose.
         ;mov         qword [rax + NODE_DATA], 0
@@ -187,8 +187,8 @@ section .text
 
     ; Information on ft_list_split.
         ; Arguments:
-        ;   RDI - Pointer/address to head-node of first list.
-        ;   RSI - Pointer/address to head-node of second list.
+        ;   RDI - Pointer/address to head-node of left_half.
+        ;   RSI - Pointer/address to head-node of right_half.
         ;   RDX - Pointer/address of 'cmp' function.
         ; Returns:
         ;   RAX - Pointer/address of new merged head-node.
@@ -202,8 +202,40 @@ ft_list_merge:
     ; Allocate memory on stack for local variables. This function is intended for recursivity. /!\ Possibility of stack overflow. Careful.
         sub         rsp, ALLOC_MERGE                    ; Allocate memory on stack.
 
-    ; ft_list_merge start.
- 
+    ; Handle edge-cases / base-case for recursivity.
+        mov         rax, rsi                            ; Set rax to right_half: rax = right_half.
+        test        rdi, rdi                            ; Verify if rdi is not 0x0: left_half != NULL.
+        jz          .end                                ; If zero flag set (thus if left_half == NULL), jump to .end.
+
+        mov         rax, rdi                            ; Set rax to left_half: rax = left_half.
+        test        rsi, rsi                            ; Verify if rsi is not 0x0: right_half != NULL.
+        jz          .end                                ; If zero flag set (thus if right_half == NULL), jump to .end.
+
+    ; Initialize stack variables.
+        mov         [rbp - CMP_FUNC], rdx               ; Store in stack 'cmp' function pointer.
+        mov         [rbp - LEFT_HALF], rdi              ; Set rdi as left_half in stack.
+        mov         [rbp - RIGHT_HALF], rsi             ; Set rsi as right_half in stack.
+
+    ; Compare the data of left_half node with data of right_half node.
+        ; cmp: { args: [rdi = void *left-data, rsi = void *right-data], ret: [rax is set 0 if equality. Positive means rdi > rsi, else negative] }
+        mov         rdi, [rdi + NODE_DATA]              ; Set rdi to the pointer to it's data: rdi = rdi->data, as requested by 'cmp'.
+        mov         rsi, [rsi + NODE_DATA]              ; Set rsi to the pointer of it's data: rsi = rsi->data, as requested by 'cmp'.
+        call        rdx                                 ; Call the 'cmp' function through it's pointer.
+
+        ; Restore nodes.
+        mov         rdi, [rbp - LEFT_HALF]              ; Restore left_half (rdi).
+        mov         rsi, [rbp - RIGHT_HALF]             ; Restore right_half (rsi).
+
+        ; Check 'cmp' output.
+        cmp         rax, 0                              ; Compare rax with 0.
+        jg          .greater                            ; if rax > 0, jump to .greater.
+
+    .smaller_or_equal:
+        ; ???
+
+    .greater:
+        ; ???
+
     .end:
         add         rsp, ALLOC_MERGE                    ; Deallocate memory on stack.
         pop         rbp                                 ; Restore previous base pointer and remove it from the top of the stack.
