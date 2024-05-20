@@ -70,17 +70,18 @@ ft_list_sort:                                               ; This function is i
 
     ; Merge  ... ??
         ; ft_list_merge: { args: [rdi = t_list *left_half, rsi = t_list *right_half, rdx = ptr/addr of 'cmp' function], ret: [rax is set to head-node of merged list] }
-        mov         rdi, [rbp - LEFT_HALF]                  ; Set rdi to left_half as requested by ft_list_merge.
-        mov         rsi, [rbp - RIGHT_HALF]                 ; Set rsi to right_half as requested by ft_list_merge.
-        mov         rdx, [rbp - CMP_FUNC]                   ; Set rdx to 'cmp' function pointer as requested by ft_list_merge.
-        call        ft_list_merge                           ; Call 'ft_list_merge'.            
+        ;mov         rdi, [rbp - LEFT_HALF]                  ; Set rdi to left_half as requested by ft_list_merge.
+        ;mov         rsi, [rbp - RIGHT_HALF]                 ; Set rsi to right_half as requested by ft_list_merge.
+        ;mov         rdx, [rbp - CMP_FUNC]                   ; Set rdx to 'cmp' function pointer as requested by ft_list_merge.
+        ;call        ft_list_merge                           ; Call 'ft_list_merge'.            
 
         mov         rdi, [rbp - BEGIN_LIST]                 ; Restore begin_list to rdi.
-        mov         [rdi], rax                              ; Make rdi reference return value of ft_list_merge.
+        ;mov         [rdi], rax                              ; Make rdi reference return value of ft_list_merge.
 
     .end:
         add         rsp, ALLOC_LIST                         ; Deallocate memory on stack.
         pop         rbp                                     ; Restore previous base pointer and remove it from the top of the stack.
+        xor         rax, rax                                ; Set rax to 0 through XOR operation as this function returns void.
         ret                                                 ; Return (by default expects the content of rax).
 
 ;;; ; ================================================================ ; ;;;
@@ -107,19 +108,68 @@ section .text
 
 ft_list_split:
     ; ft_list_split initialization.
-        endbr64                                         ; AMD specific branch prediction hint.
-        push        rbp                                 ; Push previous base pointer on top of stack.
-        mov         rbp, rsp                            ; Setup base pointer to current top of the stack. 
+        endbr64                                             ; AMD specific branch prediction hint.
+        push        rbp                                     ; Push previous base pointer on top of stack.
+        mov         rbp, rsp                                ; Setup base pointer to current top of the stack. 
+
+    ; Initialize return values.
+        mov         [rsi], rdi                              ; Set *left_half to source.
+        mov         qword [rdx], 0x0                        ; Set *right_half to 0x0 (null).
 
     ; Allocate memory on stack for local variables.
-        sub         rsp, ALLOC_SPLIT                    ; Allocate memory on stack.
+        sub         rsp, ALLOC_SPLIT                        ; Allocate memory on stack.
 
-    ; ft_list_split start.
+    ; Handle edge-cases.
+        ; Return if source == NULL.
+        test        rdi, rdi                                ; Verify if reference to pointer of source is not 0x0: source != NULL.
+        jz          .end                                    ; If zero flag set (thus if source == NULL), jump to .end.
+
+        ; Return if source->next == NULL.
+        mov         rax, [rdi + NODE_NEXT]                  ; Dereference and move rdi NODE_NEXT bytes forward, retrieving next node's pointer: rax = source->next.
+        test        rax, rax                                ; Verify if (*begin_list)->next is not 0x0: source != NULL.
+        jz          .end                                    ; If zero flag set (thus if source->next == NULL), jump to .end.
+
+    ; Initialize stack variables.
+        mov         [rbp - FAST], rax                       ; Set source->next as fast in stack.
+        mov         [rbp - SLOW], rdi                       ; Set source as fast in stack.
+
+    ; Move nodes forward using Floyd Warshall fast-slow technique.
+    .loop:
+        mov         rax, [rbp - FAST]                       ; Set rax to fast: rax = fast.
+        test        rax, rax                                ; Verify if fast is not 0x0: fast != NULL.
+        jz          .end_loop                               ; If zero flag set (thus if fast == NULL), jump to .loop_end.
+
+        mov         rax, [rax + NODE_NEXT]                  ; Move fast one node forward: rax = fast->next.
+        test        rax, rax                                ; Verify if fast->next is not 0x0: fast->next != NULL.
+        jz          .end_loop                               ; If zero flag set (thus if fast->next == NULL), jump to .loop_end.
+
+        mov         rax, [rax + NODE_NEXT]                  ; Move fast one node forward: rax = fast->next->next.
+        mov         [rbp - FAST], rax                       ; Update fast in stack.
+
+        mov         rax, [rbp - SLOW]                       ; Set rax to slow.
+        mov         rax, [rax + NODE_NEXT]                  ; move slow one node forward: rax = slow->next.
+        mov         [rbp - SLOW], rax                       ; Update slow in stack.
+
+        jmp         .loop                                   ; Jump unconditionally to .loop.
+
+    .end_loop:
+        mov         rax, [rbp - SLOW]                       ; Set rax to slow: rax = slow.
+        mov         rcx, rax                                ; Copy rax in rcx: rcx = rax = slow.
+        mov         rax, [rax + NODE_NEXT]                  ; Move rax one node forward: rax = slow->next.
+        mov         [rdx], rax                              ; Set *right_half to rax : *right_half = slow->next.
+        mov         qword [rcx + NODE_NEXT], 0             ; Break the link between the two halfs: slow->next = null.
+
+        ; Temp for testing purpose.
+        ;mov         qword [rax + NODE_DATA], 0
+        ;mov         rax, [rsi]
+        ;mov         qword [rax + NODE_DATA], 0
+        ; End temp.
 
     .end:
-        add         rsp, ALLOC_SPLIT                    ; Deallocate memory on stack.
-        pop         rbp                                 ; Restore previous base pointer and remove it from the top of the stack.
-        ret                                             ; Return (by default expects the content of rax).
+        add         rsp, ALLOC_SPLIT                        ; Deallocate memory on stack.
+        pop         rbp                                     ; Restore previous base pointer and remove it from the top of the stack.
+        xor         rax, rax                                ; Set rax to 0 through XOR operation as this function returns void.
+        ret                                                 ; Return (by default expects the content of rax).
 
 ;;; ; ================================================================ ; ;;;
 ;;; ;                          ft_list_merge                           ; ;;;
@@ -170,12 +220,20 @@ section .data
 
     ; Stack memory allocation for local variables.
     ALLOC_LIST          equ     40          ; Bytes to allocate on stack for specific function.
-    ALLOC_SPLIT         equ     0           ; Bytes to allocate on stack for specific function.
+    ALLOC_SPLIT         equ     16          ; Bytes to allocate on stack for specific function.
     ALLOC_MERGE         equ     0           ; Bytes to allocate on stack for specific function.
 
     ; General purpose stack shift offsets. To store and access, use [rbp - OFFSET] where OFFSET if the constant's name.
-    BEGIN_LIST          equ     40
-    CMP_FUNC            equ     32
-    SPLIT_SOURCE        equ     24
+    CMP_FUNC            equ     24
     LEFT_HALF           equ     16
     RIGHT_HALF          equ     8
+
+    ; ft_list_sort specific
+    BEGIN_LIST          equ     40
+    SPLIT_SOURCE        equ     32
+
+    ; ft_list_split specific
+    SLOW                equ     16
+    FAST                equ     8
+
+    ; ft_list_merge specific
