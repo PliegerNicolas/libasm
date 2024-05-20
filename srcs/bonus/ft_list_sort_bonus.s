@@ -48,18 +48,6 @@ ft_list_sort:                                               ; This function is i
         lea         rdx, [rbp - RIGHT_HALF]                 ; Load effective address of left-half (eq. to &right-half). As requested by 'ft_list_split'.
         call        ft_list_split                           ; Call 'ft_list_split'.
 
-        mov         rdi, [rsi]
-        call        ft_list_split
-
-        mov         rdi, [rsi]
-        call        ft_list_split
-
-        mov         rdi, [rsi]
-        call        ft_list_split
-
-        mov        rdi, [rsi]
-        call        ft_list_split
-
         ; ft_list_sort: { args: [rdi = t_list **head-of-sublist, rsi = ptr/addr of 'cmp' function], ret: [rax is undefined] }
         ; ft_list_sort: { args: [rdi = t_list **head-of-sublist, rsi = ptr/addr of 'cmp' function], ret: [rax is undefined] }
         ; ft_list_merge: { args: [rdi = t_list *head-of-left-sublist, rsi = t_list *head-of-right-sublist, rdx = ptr/addr of 'cmp' function], ret: [rax is set to head-node of merged list] }
@@ -114,7 +102,7 @@ ft_list_split:
         jz          .return                             ; If zero flag set, jump to .end.
 
     ; ft_list_split start.
-        mov         [rsp - FAST_NODE], rax
+        mov         [rsp - FAST_NODE], rax              ; Set source->next as fast-node in stack.
         mov         [rsp - SLOW_NODE], rdi              ; Set slow-node to source in stack. At this point slow and fast nodes are == source.
 
     .loop:
@@ -152,6 +140,7 @@ ft_list_split:
         mov         rax, [rsp - SLOW_NODE]              ; Set rax to current slow-node.
         mov         [rdx], rax                          ; Set *right-half to current slow-node.
 
+        xor         rax, rax                            ; Set rax to 0x0 (null) through XOR operation. Function returns void either way.
         add         rsp, ALLOC_SPLIT                    ; Deallocate memory on stack.
         pop         rbp                                 ; Restore previous base pointer and remove it from the top of the stack.
         ret                                             ; Return (by default expects the content of rax).
