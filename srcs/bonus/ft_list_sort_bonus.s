@@ -222,13 +222,13 @@ ft_list_merge:
         jg          .greater                            ; If rax > 0, jump to .greater.
 
     .lower_or_equal:
-        mov         [rbp - RET_HOLD], rsi               ; Store right-half in stack to preserve it.
-        mov         rsi, [rsi + NODE_NEXT]              ; Move right-half one node forward (right-half->next)
+        mov         [rbp - RET_HOLD], rdi               ; Store left-half in stack to preserve it.
+        mov         rdi, [rdi + NODE_NEXT]              ; Move left-half one node forward (left-half->next)
         jmp         .merge                              ; Jump to merge unconditionally.
 
     .greater:
-        mov         [rbp - RET_HOLD], rdi               ; Store left-half in stack to preserve it.
-        mov         rdi, [rdi + NODE_NEXT]              ; Move left-half one node forward (left-half->next)
+        mov         [rbp - RET_HOLD], rsi               ; Store right-half in stack to preserve it.
+        mov         rsi, [rsi + NODE_NEXT]              ; Move right-half one node forward (right-half->next)
 
     .merge:
     ; ft_list_merge: { args: [rdi = t_list *head-of-left-sublist, rsi = t_list *head-of-right-sublist, rdx = ptr/addr of 'cmp' function], ret: [rax is set to head-node of merged list] }
