@@ -13,6 +13,71 @@
 #include "libasm.h"
 #include "libasm_tester.h"
 
+/* C implementation */
+
+static t_list	*c_list_merge(t_list *left_half, t_list *right_half, int (*cmp)())
+{
+	if (!left_half)
+		return (right_half);
+	if (!right_half)
+		return (left_half);
+
+	if (cmp(left_half->data, right_half->data) <= 0)
+	{
+		left_half->next = c_list_merge(left_half->next, right_half, cmp);
+		return (left_half);
+	}
+	else
+	{
+		right_half->next = c_list_merge(left_half, right_half->next, cmp);
+		return (right_half);
+	}
+}
+
+static void	c_list_split(t_list *source, t_list **left_half, t_list **right_half)
+{
+	if (!source || !source->next)
+	{
+		*left_half = source;
+		*right_half = NULL;
+		return ;
+	}
+
+	t_list	*fast = source->next;
+	t_list	*slow = source;
+
+	while (fast)
+	{
+		fast = fast->next;
+		if (!fast)
+			break ;
+		fast = fast->next;
+		slow = slow->next;
+	}
+
+	*left_half = source;
+	*right_half = slow->next;
+	slow->next = NULL;
+}
+
+static void	c_list_sort(t_list **begin_list, int (*cmp)())
+{
+	if (!*begin_list || !(*begin_list)->next)
+		return ;
+
+	t_list	*source = *begin_list;
+	t_list	*left_half = NULL;
+	t_list	*right_half = NULL;
+
+	c_list_split(source, &left_half, &right_half);
+
+	c_list_sort(&left_half, cmp);
+	c_list_sort(&right_half, cmp);
+
+	*begin_list = c_list_merge(left_half, right_half, cmp);
+}
+
+
 /* Functions to pass as arguments */
 
 static int	cmp(int *data, int *data_ref)
@@ -28,8 +93,6 @@ static int	cmp(int *data, int *data_ref)
 
 static void    ft_test_speed(void (*f)(t_list **, int (*)()))
 {
-	printf("%sTest_speed (5000 * ft_list_sort(rand list of size 100)%s\n", GREEN, RESET_COLOR);
-
 	struct	timespec	start_time, end_time;
 	double	elapsed_time, average_elapsed_time;
 	double	total_elapsed_time = 0.00;
@@ -63,7 +126,7 @@ static void    ft_test_speed(void (*f)(t_list **, int (*)()))
 	printf("Average elapsed time: %f ms\n", average_elapsed_time);
 }
 
-void	test_edge_cases()
+static void	test_edge_cases()
 {
     printf("%sTest_edge_cases%s\n", GREEN, RESET_COLOR);
 
@@ -94,7 +157,7 @@ void	test_edge_cases()
 	free_list(list);
 }
 
-void	test_general()
+static void	test_general()
 {
     printf("%sTest_general_cases%s\n", GREEN, RESET_COLOR);
 
@@ -122,11 +185,19 @@ void	test_general()
 	free_list(list);
 }
 
+static void	test_speed_comparisons()
+{
+	printf("%sTest_speed_comparisons (5000 * rand_list of size 100)%s\n", GREEN, RESET_COLOR);
+
+	ft_test_speed(c_list_sort);
+	ft_test_speed(ft_list_sort);
+}
+
 void    test_ft_list_sort()
 {
 	printf("%sTest_ft_list_sort%s\n", YELLOW, RESET_COLOR);
 
-	ft_test_speed(ft_list_sort);
+	test_speed_comparisons();
 	test_edge_cases();
 	test_general();
 
