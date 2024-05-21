@@ -23,7 +23,7 @@ section .text
 ft_list_remove_if:
 
     ; ft_list_remove_if initialization.
-        endbr64                                 ; AMD specific branch prediction hint.
+        endbr64                                 ; Branch prediction hint (control flow enforcement technology).
         push        rbp                         ; Push previous base pointer on top of stack.
         mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
 
@@ -34,6 +34,7 @@ ft_list_remove_if:
         test        rcx, rcx                    ; Check if rcx ('free_fct' function ptr) is 0x0 (null).
         jz          .return                     ; If rcx ('free_fct' function ptr) is 0x0 (null), jump to .return.
 
+    ; Allocate memory on stack for local variables.
         sub         rsp, 64                     ; Allocate 64 bytes in stack (8 bytes * 8).
         mov         [rbp - SRC_HEAD_NODE], rdi  ; Set SOURCE_HEAD_NODE pointer in stack. This is a pointer to the pointer to the list's head-node.
         mov         rax, [rdi]                  ; Store in rax dereferenced rdi (dual pointer to list's head-node).
@@ -64,7 +65,7 @@ ft_list_remove_if:
         test        rax, rax                    ; Check if rax is 0x0 (null) ('cmp's output). If rax is 0, we consider equality.
         jz          .delete_node                ; If equality (zero flag set), jump to .delete_node.
     
-    .next_node:
+    ; Next node.
         mov         [rbp - PREV_NODE], rdi      ; Set PREVIOUS_NODE to rdi (current-node).
         mov         rdi, [rdi + NODE_NEXT]      ; Set rdi to current-node->next ([rdi + NODE_NEXT]).
         mov         [rbp - CURR_NODE], rdi      ; Set CURRENT_NODE to rdi (next-node).

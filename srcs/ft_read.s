@@ -20,7 +20,7 @@ section .text
 ft_read:
 
     ; ft_read initialization.
-        endbr64                                 ; AMD specific branch prediction hint.
+        endbr64                                 ; Branch prediction hint (control flow enforcement technology).
         push        rbp                         ; Push previous base pointer on top of stack.
         mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
 
