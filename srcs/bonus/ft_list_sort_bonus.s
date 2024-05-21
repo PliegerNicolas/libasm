@@ -159,12 +159,6 @@ ft_list_split:
         mov         [rdx], rax                              ; Set *right_half to rax : *right_half = slow->next.
         mov         qword [rcx + NODE_NEXT], 0              ; Break the link between the two halfs: slow->next = null.
 
-        ; Temp for testing purpose.
-        ;mov         qword [rax + NODE_DATA], 0
-        ;mov         rax, [rsi]
-        ;mov         qword [rax + NODE_DATA], 0
-        ; End temp.
-
     .end:
         add         rsp, ALLOC_SPLIT                        ; Deallocate memory on stack.
         pop         rbp                                     ; Restore previous base pointer and remove it from the top of the stack.
@@ -253,9 +247,9 @@ ft_list_merge:
         mov         rax, [rbp - RIGHT_HALF]                 ; Set rax (return value) to right_half.
 
 .end:
-        add     rsp, ALLOC_MERGE
-        pop     rbp
-        ret
+        add     rsp, ALLOC_MERGE                            ; Deallocate memory on stack.
+        pop     rbp                                         ; Restore previous base pointer and remove it from the top of the stack.
+        ret                                                 ; Return (by default expects the content of rax).
 
 ;;; ; ================================================================ ; ;;;
 ;;; ;                              data                                ; ;;;
