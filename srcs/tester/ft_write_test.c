@@ -98,14 +98,15 @@ static void	test_write_return_val()
 	printf("%ld\n", ft_write(fd, s, 0));
 	printf("errno: %s\n", strerror(errno));
 
-	printf("%sNULL (with length)%s\n", BLUE, RESET_COLOR);
-	s = NULL;
-	errno = 0;
-	printf("%ld\n", write(fd, s, 42));
-	printf("errno: %s\n", strerror(errno));
-	errno = 0;
-	printf("%ld\n", ft_write(fd, s, 42));
-	printf("errno: %s\n", strerror(errno));
+	// Not permitted by compiler.
+	//printf("%sNULL (with length)%s\n", BLUE, RESET_COLOR);
+	//s = NULL;
+	//errno = 0;
+	//printf("%ld\n", write(fd, s, 42));
+	//printf("errno: %s\n", strerror(errno));
+	//errno = 0;
+	//printf("%ld\n", ft_write(fd, s, 42));
+	//printf("errno: %s\n", strerror(errno));
 
 	printf("%sInvalid fd%s\n", BLUE, RESET_COLOR);
 	fd = -1;
@@ -147,28 +148,31 @@ static void	test_output()
 {
 	char	*s = NULL;
 	int		fd = 0;
+	size_t	ret;
 
 	printf("%sTest_output%s\n", GREEN, RESET_COLOR);
 
 	printf("%sEmpty string%s\n", BLUE, RESET_COLOR);
 	s = "\n";
-	write(fd, s, strlen(s));
-	ft_write(fd, s, strlen(s));
+	ret = write(fd, s, strlen(s));
+	ret = ft_write(fd, s, strlen(s));
 
 	printf("%sString%s\n", BLUE, RESET_COLOR);
 	s = "Hello, world!\n";
-	write(fd, s, strlen(s));
-	ft_write(fd, s, strlen(s));
+	ret = write(fd, s, strlen(s));
+	ret = ft_write(fd, s, strlen(s));
 
 	printf("%sNew lines%s\n", BLUE, RESET_COLOR);
 	s = "H\ne\nl\nl\no\n";
-	write(fd, s, strlen(s));
-	ft_write(fd, s, strlen(s));
+	ret = write(fd, s, strlen(s));
+	ret = ft_write(fd, s, strlen(s));
 
 	printf("%sMulti null-bytes%s\n", BLUE, RESET_COLOR);
 	s = "This is a message punctuated by null bytes. It shouldn't\0 finish just here \0 for example.\n";
-	write(fd, s, strlen(s));
-	ft_write(fd, s, strlen(s));
+	ret = write(fd, s, strlen(s));
+	ret = ft_write(fd, s, strlen(s));
+
+	(void)ret;
 }
 
 void    test_ft_write()

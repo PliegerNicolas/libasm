@@ -22,7 +22,7 @@ ft_strcpy:
         push        rbp                         ; Push previous base pointer on top of stack.
         mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
 
-        push        rax                         ; Push rax to stack to preserve it.
+        push        rdi                         ; Push rdi to stack to preserve it.
         xor         rax, rax                    ; Set rax to 0 through XOR operation. Used as common string offset index.
 
     .sse_loop:

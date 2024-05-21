@@ -189,7 +189,9 @@ static void	test_speed_comparisons()
 {
 	printf("%sTest_speed_comparisons (5000 * rand_list of size 100)%s\n", GREEN, RESET_COLOR);
 
+	printf("%sC: %s", BLUE, RESET_COLOR);
 	ft_test_speed(c_list_sort);
+	printf("%sASM: %s", BLUE, RESET_COLOR);
 	ft_test_speed(ft_list_sort);
 }
 

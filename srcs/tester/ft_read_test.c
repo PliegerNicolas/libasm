@@ -111,15 +111,16 @@ static void	test_buffer_after_read()
 		ret = ft_read(fd, temp_buffer, count);
 		printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
 
-		printf("%sNULL buffer (negative length)%s\n", BLUE, RESET_COLOR);
-		temp_buffer = NULL;
-		count = -2;
-		errno = 0;
-		ret = read(fd, temp_buffer, count);
-		printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
-		errno = 0;
-		ret = ft_read(fd, temp_buffer, count);
-		printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
+		// Not permitted by compiler.
+		//printf("%sNULL buffer (negative length)%s\n", BLUE, RESET_COLOR);
+		//temp_buffer = NULL;
+		//count = -2;
+		//errno = 0;
+		//ret = read(fd, temp_buffer, count);
+		//printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
+		//errno = 0;
+		//ret = ft_read(fd, temp_buffer, count);
+		//printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
 
 		printf("%sNULL buffer (valid length)%s\n", BLUE, RESET_COLOR);
 		temp_buffer = NULL;
@@ -143,16 +144,17 @@ static void	test_buffer_after_read()
 	ret = ft_read(fd, buffer, count);
 	printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
 
-	printf("%sNegative length%s\n", BLUE, RESET_COLOR);
-	count = -2;
-	errno = 0;
-	bzero(buffer, sizeof(buffer));
-	ret = read(fd, buffer, count);
-	printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
-	errno = 0;
-	bzero(buffer, sizeof(buffer));
-	ret = ft_read(fd, buffer, count);
-	printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
+	// Not permitted by compiler.
+	//printf("%sNegative length%s\n", BLUE, RESET_COLOR);
+	//count = -2;
+	//errno = 0;
+	//bzero(buffer, sizeof(buffer));
+	//ret = read(fd, buffer, count);
+	//printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
+	//errno = 0;
+	//bzero(buffer, sizeof(buffer));
+	//ret = ft_read(fd, buffer, count);
+	//printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
 
 
 
@@ -171,7 +173,7 @@ static void	test_buffer_after_read()
 	count = 256;
 	errno = 0;
 	bzero(buffer, sizeof(buffer));
-	read(fd, buffer, count);
+	ret =read(fd, buffer, count);
 	printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
 	errno = 0;
 	bzero(buffer, sizeof(buffer));
