@@ -246,7 +246,7 @@ ft_list_merge:
         mov         [rsi + NODE_NEXT], rax                  ; Set right_half->next to null to break linkage to following node.
         mov         rax, [rbp - RIGHT_HALF]                 ; Set rax (return value) to right_half.
 
-.end:
+    .end:
         add     rsp, ALLOC_MERGE                            ; Deallocate memory on stack.
         pop     rbp                                         ; Restore previous base pointer and remove it from the top of the stack.
         ret                                                 ; Return (by default expects the content of rax).
