@@ -26,6 +26,43 @@ static int	cmp(int *data, int *data_ref)
 
 /* Tests */
 
+static void    ft_test_speed(void (*f)(t_list **, int (*)()))
+{
+	printf("%sTest_speed (5000 * ft_list_sort(rand list of size 100)%s\n", GREEN, RESET_COLOR);
+
+	struct	timespec	start_time, end_time;
+	double	elapsed_time, average_elapsed_time;
+	double	total_elapsed_time = 0.00;
+	int		count = 5000;
+
+	t_list	*list = NULL;
+
+	for (int i = 0; i < (count / 10); ++i)
+	{
+		list = generate_list(100);
+		if (!list)
+			return ;
+		f(&list, cmp);
+		free_list(list);
+	}
+
+	for (int i = 0; i < count; ++i)
+	{
+		list = generate_list(100);
+		if (!list)
+			return ;
+		clock_gettime(CLOCK_MONOTONIC, &start_time);
+		f(&list, cmp);
+		clock_gettime(CLOCK_MONOTONIC, &end_time);
+		free_list(list);
+		elapsed_time = (end_time.tv_sec - start_time.tv_sec) * 1000.0 + (end_time.tv_nsec - start_time.tv_nsec) / 1000000.0;
+		total_elapsed_time += elapsed_time;
+	}
+
+	average_elapsed_time = total_elapsed_time / count;
+	printf("Average elapsed time: %f ms\n", average_elapsed_time);
+}
+
 void	test_edge_cases()
 {
     printf("%sTest_edge_cases%s\n", GREEN, RESET_COLOR);
@@ -89,6 +126,7 @@ void    test_ft_list_sort()
 {
 	printf("%sTest_ft_list_sort%s\n", YELLOW, RESET_COLOR);
 
+	ft_test_speed(ft_list_sort);
 	test_edge_cases();
 	test_general();
 

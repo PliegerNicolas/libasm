@@ -72,7 +72,7 @@ ft_list_sort:                                               ; This function is i
         mov         rsi, [rbp - CMP_FUNC]                   ; Set rsi to 'cmp' function pointer.
         call        ft_list_sort                            ; Call 'ft_list_sort' recursivly.
 
-    ; Merge  ... ??
+    ; Merge  left and right half lists.
         ; ft_list_merge: { args: [rdi = t_list *left_half, rsi = t_list *right_half, rdx = ptr/addr of 'cmp' function], ret: [rax is set to head-node of merged list] }
         mov         rdi, [rbp - LEFT_HALF]                  ; Set rdi to left_half as requested by ft_list_merge.
         mov         rsi, [rbp - RIGHT_HALF]                 ; Set rsi to right_half as requested by ft_list_merge.

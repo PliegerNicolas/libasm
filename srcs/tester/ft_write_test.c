@@ -18,11 +18,12 @@ static void    ft_test_speed(int fd, const char *str, size_t length, ssize_t (*f
 	struct	timespec	start_time, end_time;
 	double	elapsed_time, average_elapsed_time;
 	double	total_elapsed_time = 0.00;
+	int		count = 5000;
 
-	for (int i = 0; i < 500; ++i)
+	for (int i = 0; i < (count / 10); ++i)
 		f(fd, str, length);
 
-	for (int i = 0; i < 5000; ++i)
+	for (int i = 0; i < count; ++i)
 	{
 		clock_gettime(CLOCK_MONOTONIC, &start_time);
 		f(fd, str, length);
@@ -31,7 +32,7 @@ static void    ft_test_speed(int fd, const char *str, size_t length, ssize_t (*f
 		total_elapsed_time += elapsed_time;
 	}
 
-	average_elapsed_time = total_elapsed_time / 500;
+	average_elapsed_time = total_elapsed_time / count;
 	printf("Average elapsed time: %f ms\n", average_elapsed_time);
 }
 
