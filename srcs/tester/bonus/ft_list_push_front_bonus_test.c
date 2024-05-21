@@ -85,14 +85,18 @@ static int  test_push_with_nulls()
     return (0);
 }
 
-void    test_ft_list_push_front(t_list **head)
+void    test_ft_list_push_front()
 {
 	printf("%sTest_ft_list_push_front%s\n", YELLOW, RESET_COLOR);
 
-    if (test_push_multiple(head))
+    t_list  *list = generate_list(0);
+
+    if (test_push_multiple(&list))
         return ;
     if (test_push_with_nulls())
         return ;
+
+    free_list(list);
 
     printf("\n");
 }

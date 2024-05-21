@@ -32,16 +32,17 @@ void    test_ft_strlen();
 void    test_ft_write();
 
 // Bonus
-t_list  *push_node(t_list *head, void *new_data);
-int     *generate_data(int nbr);
 void	print_list(t_list *head);
 void	print_list_ptrs(t_list *head);
+int     *generate_data(int nbr);
+t_list	*generate_list(size_t n);
+t_list  *push_node(t_list *head, void *new_data);
 t_list  *free_list(t_list *head);
 
-void    test_ft_atoi_base(t_list **head);
-void    test_ft_list_push_front(t_list **head);
-void    test_ft_list_remove_if(t_list **head);
-void    test_ft_list_size(t_list **head);
-void    test_ft_list_sort(t_list **head);
+void    test_ft_atoi_base();
+void    test_ft_list_push_front();
+void    test_ft_list_remove_if();
+void    test_ft_list_size();
+void    test_ft_list_sort();
 
 #endif

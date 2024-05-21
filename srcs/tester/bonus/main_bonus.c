@@ -13,38 +13,7 @@
 #include "libasm.h"
 #include "libasm_tester.h"
 
-t_list  *push_node(t_list *head, void *new_data)
-{
-    t_list  *current_node = head;
-    t_list  *new_node;
-
-    new_node = malloc(1 * sizeof(*new_node));
-    if (!new_node)
-        return (head);
-
-    new_node->data = new_data;
-    new_node->next = NULL;
-
-    if (!head)
-        head = new_node;
-    else
-    {
-        while (current_node->next)
-            current_node = current_node->next;
-        current_node->next = new_node;
-    }
-    return (head);
-}
-
-int	*generate_data(int nbr)
-{
-	int	*data = NULL;
-	data = malloc(sizeof(nbr));
-	if (!data)
-		return (NULL);
-	*data = nbr;
-	return (data);
-}
+/* Output */
 
 void	print_list(t_list *head)
 {
@@ -82,6 +51,61 @@ void	print_list_ptrs(t_list *head)
 	printf("]\n");
 }
 
+/* Creation. */
+
+int	*generate_data(int nbr)
+{
+	int	*data = NULL;
+	data = malloc(sizeof(nbr));
+	if (!data)
+		return (NULL);
+	*data = nbr;
+	return (data);
+}
+
+t_list	*generate_list(size_t n)
+{
+	t_list	*new_list = NULL;
+	int		*data = NULL;
+
+	srand(time(NULL));
+
+	for(size_t i = 0; i < n; ++i)
+	{
+		data = generate_data(rand() % 100);
+		if (!data)
+			return (free_list(new_list), NULL);
+		new_list = push_node(new_list, data);
+	}
+
+	return (new_list);
+}
+
+/* Manipulation */
+
+t_list  *push_node(t_list *head, void *new_data)
+{
+    t_list  *current_node = head;
+    t_list  *new_node;
+
+    new_node = malloc(1 * sizeof(*new_node));
+    if (!new_node)
+        return (head);
+
+    new_node->data = new_data;
+    new_node->next = NULL;
+
+    if (!head)
+        head = new_node;
+    else
+    {
+        while (current_node->next)
+            current_node = current_node->next;
+        current_node->next = new_node;
+    }
+    return (head);
+}
+
 t_list  *free_list(t_list *head)
 {
     t_list  *current_node = head;
@@ -99,6 +123,8 @@ t_list  *free_list(t_list *head)
     return (NULL);
 }
 
+/* Main */
+
 int	main(void)
 {
     // Mandatory
@@ -109,25 +135,12 @@ int	main(void)
 	//test_ft_strcpy();
 	//test_ft_strdup();
 
-	t_list  *list = NULL;
-	int		*data = NULL;
-
-	srand(time(NULL));
-
-	for(int i = 0; i < 5; ++i)
-	{
-		data = generate_data(rand() % 100);
-		if (!data)
-			return (free_list(list), 1);
-		list = push_node(list, data);
-	}
-
 	// Bonus
-	test_ft_atoi_base(&list);
-	test_ft_list_push_front(&list);
-	test_ft_list_remove_if(&list);
-	test_ft_list_size(&list);
-	test_ft_list_sort(&list);
+	test_ft_atoi_base();
+	test_ft_list_push_front();
+	test_ft_list_remove_if();
+	test_ft_list_size();
+	test_ft_list_sort();
 
-	return (free_list(list), 0);
+	return (0);
 }

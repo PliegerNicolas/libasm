@@ -101,14 +101,23 @@ static int	test_rm_if_with_nulls()
 	return (0);
 }
 
-void    test_ft_list_remove_if(t_list **head)
+void    test_ft_list_remove_if()
 {
 	printf("%sTest_ft_list_remove_if%s\n", YELLOW, RESET_COLOR);
 
+	t_list	*list = generate_list(5);
+	ft_list_push_front(&list, generate_data(1));
+	ft_list_push_front(&list, generate_data(42));
+	ft_list_push_front(&list, generate_data(42));
+	ft_list_push_front(&list, generate_data(24));
+	ft_list_push_front(&list, generate_data(84));
+
 	if (test_rm_if_with_nulls())
 		return ;
-	if (test_rm_if_general_usage(head))
+	if (test_rm_if_general_usage(&list))
 		return ;
+
+	free_list(list);
 
 	printf("\n");
 }

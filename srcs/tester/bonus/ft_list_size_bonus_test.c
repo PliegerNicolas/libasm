@@ -31,12 +31,16 @@ void    test_lengthy_list(t_list **head)
     printf("Size: %d\n", ft_list_size(*head));
 }
 
-void    test_ft_list_size(t_list **head)
+void    test_ft_list_size()
 {
 	printf("%sTest_ft_list_size%s\n", YELLOW, RESET_COLOR);
 
+    t_list  *list = generate_list(42);
+
     test_empty_list();
-    test_lengthy_list(head);
+    test_lengthy_list(&list);
+
+    free_list(list);
 
 	printf("\n");
 }
