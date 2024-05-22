@@ -53,7 +53,7 @@ ft_strdup:
         mov     rdi, ENOMEM                     ; Move error code to rdi. _errno_location will need rax.
         call    __errno_location wrt ..plt      ; Call __errno_location, returns the memory address of the errno variable.
         mov     [rax], rdi                      ; Set errno value by dereferencing it and giving it the rdi value.
-        mov     rax, 0x0                        ; Set return value (rax) to -1.
+        mov     rax, 0x0                        ; Set return value (rax) to 0x0 (null).
         jmp     .end                            ; Jump to .end unconditionally.
 
 section .data
