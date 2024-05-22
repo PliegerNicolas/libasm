@@ -60,7 +60,7 @@ ft_list_sort:                                               ; This function is i
 
     ; Call recursivly 'ft_list_sort' on left_half.
         ; ft_list_sort: { args: [rdi = t_list **left_half, rsi = ptr/addr of 'cmp' function], ret: [rax is undefined] }
-        lea         rdi, [rbp - LEFT_HALF]                  ; Set rdi to left_half's effective address in stack as requested by ft_list_sort.
+        mov         rdi, rsi                                ; Set rdi to left_half's effective address as requested by ft_list_sort. We know that ft_list_split doesn't modify rsi and rdx so we can reuse it.
         mov         rsi, [rbp - CMP_FUNC]                   ; Set rsi to 'cmp' function pointer.
         call        ft_list_sort                            ; Call 'ft_list_sort' recursivly.
 
