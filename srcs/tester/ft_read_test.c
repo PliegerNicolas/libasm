@@ -100,16 +100,18 @@ static void	test_buffer_after_read()
 
 	{
 		char	*temp_buffer = NULL;
-		
-		printf("%sNULL buffer (0 length)%s\n", BLUE, RESET_COLOR);
-		temp_buffer = NULL;
-		count = 0;
-		errno = 0;
-		ret = read(fd, temp_buffer, count);
-		printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
-		errno = 0;
-		ret = ft_read(fd, temp_buffer, count);
-		printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
+		(void)temp_buffer;
+
+		// strlen on NULL causes a conditional jump or move depending on uninitialised value(s) in both cases. So commented out.
+		//printf("%sNULL buffer (0 length)%s\n", BLUE, RESET_COLOR);
+		//temp_buffer = NULL;
+		//count = 0;
+		//errno = 0;
+		//ret = read(fd, temp_buffer, count);
+		//printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
+		//errno = 0;
+		//ret = ft_read(fd, temp_buffer, count);
+		//printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
 
 		// Not permitted by compiler.
 		//printf("%sNULL buffer (negative length)%s\n", BLUE, RESET_COLOR);
@@ -122,15 +124,16 @@ static void	test_buffer_after_read()
 		//ret = ft_read(fd, temp_buffer, count);
 		//printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
 
-		printf("%sNULL buffer (valid length)%s\n", BLUE, RESET_COLOR);
-		temp_buffer = NULL;
-		count = 10;
-		errno = 0;
-		ret = read(fd, temp_buffer, count);
-		printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
-		errno = 0;
-		ret = ft_read(fd, temp_buffer, count);
-		printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
+		// Both causes read(buf) points to unaddressable byte(s). So commented out.
+		//printf("%sNULL buffer (valid length)%s\n", BLUE, RESET_COLOR);
+		//temp_buffer = NULL;
+		//count = 10;
+		//errno = 0;
+		//ret = read(fd, temp_buffer, count);
+		//printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
+		//errno = 0;
+		//ret = ft_read(fd, temp_buffer, count);
+		//printf("'%s'\n%s[%ld] (errno: %s)%s\n", buffer, GRAY, ret, strerror(errno), RESET_COLOR);
 	}
 
 	printf("%s0 length%s\n", BLUE, RESET_COLOR);

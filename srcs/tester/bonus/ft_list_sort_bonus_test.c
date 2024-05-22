@@ -132,15 +132,26 @@ static void	test_edge_cases()
 
 	t_list	*list = NULL;
 
+	// This returns without an error. We should maybe want a segfault but not gonna risk it with 42 corrections.
 	printf("%snull arguments%s\n", BLUE, RESET_COLOR);
 	print_list(list);
 	ft_list_sort(NULL, NULL);
+
 	printf("%sempty list with 'cmp' function.%s\n", BLUE, RESET_COLOR);
 	print_list(list);
 	ft_list_sort(&list, cmp);
+
 	printf("%sempty list and null 'cmp' function%s\n", BLUE, RESET_COLOR);
 	print_list(list);
 	ft_list_sort(&list, NULL);
+
+	// This returns without an error. We should maybe want a segfault but not gonna risk it with 42 corrections.
+	ft_list_push_front(&list, generate_data(42));
+	ft_list_push_front(&list, generate_data(42));
+	printf("%slist and null 'cmp' function%s\n", BLUE, RESET_COLOR);
+	print_list(list);
+	ft_list_sort(&list, NULL);
+	free_list(list);
 
 	list = generate_list(1);
 	printf("%ssize 1 list%s\n", BLUE, RESET_COLOR);

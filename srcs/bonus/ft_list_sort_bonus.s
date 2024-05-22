@@ -26,11 +26,11 @@ ft_list_sort:                                               ; This function is i
         sub         rsp, ALLOC_LIST                         ; Allocate memory on stack.
 
     ; Verify base-case.
-        ; Return if 'cmp' == NULL.
+        ; Return if 'cmp' == NULL. We could remove this because it's practical to get segfaults when wrong arguments are passed.
         test        rsi, rsi                                ; Verify if 'cmp' function is not 0x0: begin_list != NULL.
         jz          .end                    
 
-        ; Return if begin_list == NULL.
+        ; Return if begin_list == NULL. We could remove this because it's practical to get segfaults when wrong arguments are passed.
         test        rdi, rdi                                ; Verify if reference to pointer of begin_list is not 0x0: begin_list != NULL.
         jz          .end                                    ; If zero flag set (thus if begin_list == NULL), jump to .end.
 

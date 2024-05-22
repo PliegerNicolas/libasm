@@ -10,9 +10,10 @@ section .text
 
     ; Information on ft_atoi_base.
         ; Arguments:
-        ;
+        ;   RDI - Pointer to string (s) to convert to integer.
+        ;   RSI - Pointer to string (base) representing the base to convert to (0123456789ABCDEF for hex for example).
         ; Returns:
-        ;   RAX -
+        ;   RAX - The converted value as an integer (32bits (eax)).
 
 ft_atoi_base:
 
