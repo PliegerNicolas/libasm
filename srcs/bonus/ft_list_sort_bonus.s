@@ -110,6 +110,17 @@ section .text
         ; Returns:
         ;   RAX - NULL
 
+    ; rdi rsi rdx rax
+    ; rdi modifiable
+    ; rsi non modifiable. Non updatable.
+    ; rdx non modifiable. Updatable cependant.
+    ; rax modifiable.
+    ; rcx modifiable.
+    ; R8 modifiable.
+    ; R9 modifiable.
+    ; R10 modifiable.
+    ; R11 modifiable.
+
 ft_list_split:
     ; ft_list_split initialization.
         endbr64                                             ; Branch prediction hint (control flow enforcement technology).
@@ -121,7 +132,7 @@ ft_list_split:
         mov         qword [rdx], 0x0                        ; Set *right_half to 0x0 (null).
 
     ; Allocate memory on stack for local variables.
-        sub         rsp, ALLOC_SPLIT                        ; Allocate memory on stack.
+    ;    sub         rsp, ALLOC_SPLIT                        ; Allocate memory on stack.
 
     ; Handle edge-cases.
         ; Return if source == NULL.
@@ -133,13 +144,12 @@ ft_list_split:
         test        rax, rax                                ; Verify if (*begin_list)->next is not 0x0: source != NULL.
         jz          .end                                    ; If zero flag set (thus if source->next == NULL), jump to .end.
 
-    ; Initialize stack variables.
-        mov         [rbp - FAST], rax                       ; Set source->next as fast in stack.
-        mov         [rbp - SLOW], rdi                       ; Set source as fast in stack.
+        ; Initialize fast-node and slow-node.
+        ;mov        rax, rax                                ; Rax is already equal to source->next. Commented out, just present for clarity.
+        mov         rcx, rdi                                ; Set rcx to source initially. Represents slow-node.
 
     ; Move nodes forward using Floyd Warshall fast-slow technique.
     .loop:
-        mov         rax, [rbp - FAST]                       ; Set rax to fast: rax = fast.
         test        rax, rax                                ; Verify if fast is not 0x0: fast != NULL.
         jz          .end_loop                               ; If zero flag set (thus if fast == NULL), jump to .loop_end.
 
@@ -148,23 +158,17 @@ ft_list_split:
         jz          .end_loop                               ; If zero flag set (thus if fast->next == NULL), jump to .loop_end.
 
         mov         rax, [rax + NODE_NEXT]                  ; Move fast one node forward: rax = fast->next->next.
-        mov         [rbp - FAST], rax                       ; Update fast in stack.
-
-        mov         rax, [rbp - SLOW]                       ; Set rax to slow.
-        mov         rax, [rax + NODE_NEXT]                  ; move slow one node forward: rax = slow->next.
-        mov         [rbp - SLOW], rax                       ; Update slow in stack.
+        mov         rcx, [rcx + NODE_NEXT]                  ; move slow one node forward: rcx = slow->next.
 
         jmp         .loop                                   ; Jump unconditionally to .loop.
 
     .end_loop:
-        mov         rax, [rbp - SLOW]                       ; Set rax to slow: rax = slow.
-        mov         rcx, rax                                ; Copy rax in rcx: rcx = rax = slow.
-        mov         rax, [rax + NODE_NEXT]                  ; Move rax one node forward: rax = slow->next.
-        mov         [rdx], rax                              ; Set *right_half to rax : *right_half = slow->next.
-        mov         qword [rcx + NODE_NEXT], 0              ; Break the link between the two halfs: slow->next = null.
+        mov         r8, rcx                                 ; Copy slow-node (rcx) in r8.
+        mov         rcx, rcx[ + NODE_NEXT]                  ; Move slow one node forward: rcx = slow-node->next.
+        mov         [rdx], rcx                              ; Set *right_half to rcx : *right_half = slow->next.
+        mov         qword [r8 + NODE_NEXT], 0               ; Break the link between the two halfs: slow->next = null.
 
     .end:
-        add         rsp, ALLOC_SPLIT                        ; Deallocate memory on stack.
         pop         rbp                                     ; Restore previous base pointer and remove it from the top of the stack.
         xor         rax, rax                                ; Set rax to 0 through XOR operation as this function returns void.
         ret                                                 ; Return (by default expects the content of rax).
