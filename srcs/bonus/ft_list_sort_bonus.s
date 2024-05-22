@@ -228,7 +228,7 @@ ft_list_merge:
 
         mov         rdi, [rbp - LEFT_HALF]                  ; Recuperate left_half from stack.
         mov         [rdi + NODE_NEXT], rax                  ; Set left_half->next to null to break linkage to following node.
-        mov         rax, [rbp - LEFT_HALF]                  ; Set rax (return value) to left_half.
+        mov         rax, rdi                                ; Set rax (return value) to left_half.
 
         jmp         .end                                    ; Jump unconditionally to .end.
 
@@ -239,7 +239,7 @@ ft_list_merge:
 
         mov         rsi, [rbp - RIGHT_HALF]                 ; Recuperate right_half from stack.
         mov         [rsi + NODE_NEXT], rax                  ; Set right_half->next to null to break linkage to following node.
-        mov         rax, [rbp - RIGHT_HALF]                 ; Set rax (return value) to right_half.
+        mov         rax, rsi                                ; Set rax (return value) to right_half.
 
     .end:
         add     rsp, ALLOC_MERGE                            ; Deallocate memory on stack.
