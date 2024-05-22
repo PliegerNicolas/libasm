@@ -40,7 +40,9 @@ static void	test_speed_comparisons()
 {
 	printf("%sTest_speed_comparisons%s\n", GREEN, RESET_COLOR);
 
+	printf("%sC: %s", BLUE, RESET_COLOR);
 	ft_test_speed("Skrattar du, förlorar du, mannen !", strlen);
+	printf("%sASM: %s", BLUE, RESET_COLOR);
 	ft_test_speed("Skrattar du, förlorar du, mannen !", ft_strlen);
 }
 

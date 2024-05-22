@@ -115,13 +115,21 @@ static void	test_non_ascii_chars()
 	printf("%d\n", ft_strcmp("Special characters: !@#$%^&*()", "Special characters: ()*&^%$#@!"));
 }
 
+static void	test_speed_comparisons()
+{
+	printf("%sTest_speed_comparisons%s\n", GREEN, RESET_COLOR);
+
+	printf("%sC: %s", BLUE, RESET_COLOR);
+    ft_test_speed("Skrattar du, förlorar du, mannen !", "abcde", strcmp);
+	printf("%sASM: %s", BLUE, RESET_COLOR);
+    ft_test_speed("Skrattar du, förlorar du, mannen !", "abcde", ft_strcmp);
+}
+
 void    test_ft_strcmp()
 {
     printf("%sTest_ft_strcmp%s\n", YELLOW, RESET_COLOR);
 
-    ft_test_speed("Skrattar du, förlorar du, mannen !", "abcde", strcmp);
-    ft_test_speed("Skrattar du, förlorar du, mannen !", "abcde", ft_strcmp);
-
+	test_speed_comparisons();
 	test_empty_equal_strings();
 	test_charlimits_equal_strings();
 	test_charlimits_unequal_strings();

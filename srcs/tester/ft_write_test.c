@@ -51,32 +51,44 @@ static void	test_speed_comparisons()
 
 	printf("%sEmpty%s\n", BLUE, RESET_COLOR);
 	s = "";
+	printf("%sC: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, s, strlen(s), write);
+	printf("%sASM: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, s, strlen(s), ft_write);
 
 	printf("%sReally short%s\n", BLUE, RESET_COLOR);
 	s = ".";
+	printf("%sC: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, s, strlen(s), write);
+	printf("%sASM: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, s, strlen(s), ft_write);
 
 	printf("%sShort%s\n", BLUE, RESET_COLOR);
 	s = "A short string.";
+	printf("%sC: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, s, strlen(s), write);
+	printf("%sASM: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, s, strlen(s), ft_write);
 
 	printf("%sMedium%s\n", BLUE, RESET_COLOR);
 	s = "Medium using SSE loop once.";
+	printf("%sC: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, s, strlen(s), write);
+	printf("%sASM: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, s, strlen(s), ft_write);
 
 	printf("%sLong%s\n", BLUE, RESET_COLOR);
 	s = "With such long strings normally SSE loop should be utilized more than once and provide good performance. Let's see if it's true ...";
+	printf("%sC: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, s, strlen(s), write);
+	printf("%sASM: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, s, strlen(s), ft_write);
 
 	printf("%sreally Long%s\n", BLUE, RESET_COLOR);
 	s = "Well. I don't know what I should write to get to 256 bytes but guess we're almost there ? Oh no. That was 90, we're gonna have to fill this in with random things again. 169 now ? Nice. Pity we're not planning to reach 420. We're aiming for 256 and hop !!!";
+	printf("%sC: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, s, strlen(s), write);
+	printf("%sASM: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, s, strlen(s), ft_write);
 
 	close (fd);

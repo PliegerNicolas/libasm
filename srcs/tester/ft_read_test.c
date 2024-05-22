@@ -52,32 +52,44 @@ static void	test_speed_comparisons()
 
 	printf("%sEmpty%s\n", BLUE, RESET_COLOR);
 	len = 0;
+	printf("%sC: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, buffer, len, read);
+	printf("%sASM: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, buffer, len, ft_read);
 
 	printf("%sReally short%s\n", BLUE, RESET_COLOR);
 	len = 5;
+	printf("%sC: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, buffer, len, read);
+	printf("%sASM: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, buffer, len, ft_read);
 
 	printf("%sShort%s\n", BLUE, RESET_COLOR);
 	len = 16;
+	printf("%sC: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, buffer, len, read);
+	printf("%sASM: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, buffer, len, ft_read);
 
 	printf("%sMedium%s\n", BLUE, RESET_COLOR);
 	len = 128;
+	printf("%sC: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, buffer, len, read);
+	printf("%sASM: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, buffer, len, ft_read);
 
 	printf("%sLong%s\n", BLUE, RESET_COLOR);
 	len = 1024;
+	printf("%sC: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, buffer, len, read);
+	printf("%sASM: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, buffer, len, ft_read);
 
 	printf("%sreally Long%s\n", BLUE, RESET_COLOR);
 	len = 2048;
+	printf("%sC: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, buffer, len, read);
+	printf("%sASM: %s", BLUE, RESET_COLOR);
 	ft_test_speed(fd, buffer, len, ft_read);
 
 	close (fd);
