@@ -50,12 +50,10 @@ ft_list_sort:                                               ; This function is i
 
         mov         rax, [rdi]                              ; Set rax to *begin_list.
         mov         [rbp - SPLIT_SOURCE], rax               ; Set SPLIT_SOURCE to *begin_list (rax).
-        mov         qword [rbp - LEFT_HALF], 0x0            ; Initialize left_half to 0 (null).
-        mov         qword [rbp - RIGHT_HALF], 0x0           ; Initialize right_half to 0 (null).
 
     ; Split source into left_half and right_half using 'ft_list_split' function.
         ; ft_list_split: { args: [rdi = t_list *source, rsi = t_list **left_half, rdx = t_list **right_half], ret: [rax is undefined] }
-        mov         rdi, [rbp - SPLIT_SOURCE]               ; Set rdi to split_source as requested by ft_list_split.
+        mov         rdi, rax                                ; Set rdi to split_source (rax = [rdi] = split_source).
         lea         rsi, [rbp - LEFT_HALF]                  ; Set rsi to left_half's effective address in stack as requested by ft_list_split.
         lea         rdx, [rbp - RIGHT_HALF]                 ; Set rdx to right_half's effective address in stack as requested by ft_list_split.
         call        ft_list_split                           ; Call 'ft_list_split'.
@@ -109,17 +107,6 @@ section .text
         ;   RDX - Reference to pointer/address of right-half head-node. Present so ft_list_split can return the values through those pointers.
         ; Returns:
         ;   RAX - NULL
-
-    ; rdi rsi rdx rax
-    ; rdi modifiable
-    ; rsi non modifiable. Non updatable.
-    ; rdx non modifiable. Updatable cependant.
-    ; rax modifiable.
-    ; rcx modifiable.
-    ; R8 modifiable.
-    ; R9 modifiable.
-    ; R10 modifiable.
-    ; R11 modifiable.
 
 ft_list_split:
     ; ft_list_split initialization.
@@ -270,7 +257,6 @@ section .data
 
     ; Stack memory allocation for local variables.
     ALLOC_LIST          equ     40          ; Bytes to allocate on stack for specific function.
-    ALLOC_SPLIT         equ     16          ; Bytes to allocate on stack for specific function.
     ALLOC_MERGE         equ     24          ; Bytes to allocate on stack for specific function.
 
     ; General purpose stack shift offsets. To store and access, use [rbp - OFFSET] where OFFSET if the constant's name.
@@ -287,3 +273,6 @@ section .data
     FAST                equ     8
 
     ; ft_list_merge specific
+
+; This code is far from being as fast as it's C version optimized with -O3 but learning purposes wise, I'm content. It works, it's fast and it's readable.
+; I should minimize stack calls but with recursivity it's complicated. Do loop unrolling also. Minimize calls to stack.
