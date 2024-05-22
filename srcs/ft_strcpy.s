@@ -19,10 +19,9 @@ ft_strcpy:
 
     ; ft_strcpy initialization.
         endbr64                                 ; Branch prediction hint (control flow enforcement technology).
-        push        rbp                         ; Push previous base pointer on top of stack.
-        mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
+        ; No stack setup because we do not use it or call functions.
 
-        push        rdi                         ; Push rdi to stack to preserve it.
+        mov         r8, rdi                     ; Move rdi to r8 to preserve it.
         xor         rax, rax                    ; Set rax to 0 through XOR operation. Used as common string offset index.
 
     .sse_loop:
@@ -44,8 +43,7 @@ ft_strcpy:
         jnz             .byte_loop              ; If not a null-byte, jump to .byte_loop.
 
     .end:
-        pop         rax                         ; Restore rax
-        pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.
+        mov             rax, r8                 ; Push the preserve value of rdi to rax to return it.
         ret                                     ; Return (by default expects the content of rax).
 
 ; /!\ This implementation of strcpy has slower performances to the original clib strcpy. /!\

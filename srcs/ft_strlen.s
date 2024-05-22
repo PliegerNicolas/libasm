@@ -18,8 +18,7 @@ ft_strlen:
 
     ; ft_strlen initialization.
         endbr64                                 ; Branch prediction hint (control flow enforcement technology).
-        push        rbp                         ; Push previous base pointer on top of stack.
-        mov         rbp, rsp                    ; Setup base pointer to current top of the stack.
+        ; No stack setup because we do not use it or call functions.
 
     ; ft_strlen start.
         xor             rax, rax                ; Set rax to 0 through XOR operation. It will contain the result and serve as offset (counter valid character bytes).
@@ -37,7 +36,6 @@ ft_strlen:
 
     .end:
         add         rax, rcx                    ; Add the remaining read bytes contained in rcx/cx to rax.
-        pop         rbp                         ; Restore previous base pointer and remove it from the top of the stack.
         ret                                     ; Return (by default expects the content of rax).
 
 ; This implementation of strlen has similar performances to the original clib strlen.

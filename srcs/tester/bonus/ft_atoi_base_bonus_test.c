@@ -13,11 +13,11 @@
 #include "libasm.h"
 #include "libasm_tester.h"
 
-void    test_ft_atoi_base(t_list **head)
+void    test_ft_atoi_base()
 {
 	printf("%sTest_ft_atoi_base%s\n", YELLOW, RESET_COLOR);
 
-    (void)head;
+    printf("%d\n", ft_atoi_base(NULL, "123"));
 
 	printf("\n");
 }

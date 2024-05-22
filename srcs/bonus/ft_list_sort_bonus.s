@@ -7,7 +7,6 @@ section .text
 
     ; Function entry-point for linker.
     global  ft_list_sort
-    global  ft_merge_sort
 
     ; Information on ft_list_sort.
         ; Arguments:
@@ -111,8 +110,7 @@ section .text
 ft_list_split:
     ; ft_list_split initialization.
         endbr64                                             ; Branch prediction hint (control flow enforcement technology).
-        push        rbp                                     ; Push previous base pointer on top of stack.
-        mov         rbp, rsp                                ; Setup base pointer to current top of the stack. 
+        ; No stack initialization because we do not call any function or use stack.
 
     ; Initialize return values.
         mov         [rsi], rdi                              ; Set *left_half to source.
@@ -156,7 +154,6 @@ ft_list_split:
         mov         qword [r8 + NODE_NEXT], 0               ; Break the link between the two halfs: slow->next = null.
 
     .end:
-        pop         rbp                                     ; Restore previous base pointer and remove it from the top of the stack.
         xor         rax, rax                                ; Set rax to 0 through XOR operation as this function returns void.
         ret                                                 ; Return (by default expects the content of rax).
 
