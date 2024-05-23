@@ -21,6 +21,8 @@ ft_atoi_base:
         push        rbp                                     ; Push previous base pointer on top of stack.
         mov         rbp, rsp                                ; Setup base pointer to current top of the stack.
 
+    ; Initialize registers.
+        push        rbx                                     ; Store rbx in stack as it is a caller-saved register.
         xor         rax, rax                                ; Initialize rax to 0 as it is the return value in case an error occurs.
         xor         rcx, rcx                                ; Initialize rcx to 0 as it is the read index in loops for strings.
 
@@ -30,10 +32,15 @@ ft_atoi_base:
         test        rsi, rsi                                ; Verify if rsi (base) is 0x0 (null).
         jz          .end                                    ; If rsi (s) is null, jump to .end.
 
-        mov         rdi, rsi
-        call ft_check_base
+    ; Check base.
+        ; ft_check_base: { args: [rdi = Pointer to base string], ret: [rax is set to 0 if valid base. Else 1.] }
+        mov         rbx, rdi                                ; Store rdi in rbx to preserve it.
+        mov         rdi, rsi                                ; Set rdi to pointer to base string as requested by 'ft_check_base'.
+        call ft_check_base                                  ; Call 'ft_check_base'.
+        mov         rdi, rbx                                ; Restire rdi from rbx.
 
     .end:
+        pop         rbx                                     ; Restore rbx from stack.
         pop         rbp                                     ; Restore previous base pointer and remove it from the top of the stack.
         ret                                                 ; Return (by default expects the content of rax).
 
@@ -75,20 +82,32 @@ ft_check_base:
         vmovdqu     [rbp - 96], ymm0                        ; Initialize the allocated data on stack to 0x0.
         vmovdqu     [rbp - 128], ymm0                        ; Initialize the allocated data on stack to 0x0.
 
+        ; Verify if rdi (str) is null.
+        test        rdi, rdi
+        jz          .base_error
+
+        ; Preserve data.
         mov         r8, rdi                                 ; Cpy rdi to r8 to preserve it.
 
     .loop:
         ; Verify if null byte reached.
         movzx       rdi, byte [r8 + rcx]                    ; Read r8 byte per byte (string). Store it in rdi and pad the extra space of rdi's register with 0s.
         test        dil, dil                                ; Check if dil (8 LSB of rdi) isn't null byte. If it is it means we reached end of string.
-        jz          .end                                    ; If end of string reached, jump to .end.
+        jz          .check_length                           ; If end of string reached, jump to .end.
 
-        ; Verify if whitespace char acter found.
+        ; Verify if whitespace character found.
         ; ft_isspace: { args: [rdi = character/byte], ret: [rax is 1 if whitespace, else 0.] }   
         call        ft_isspace                              ; Call 'ft_isspace'.
         test        rax, rax                                ; Check output of 'ft_isspace'. If different than 0 it means a whitespace has been found.
-        jnz         .base_error                             ; If whitespace found, jump to .end.
-        ; RDI isn't modified by ft_isspace. We take that into account so we do not have to restore it.
+        jnz         .base_error                             ; If whitespace found, jump to .base_error.
+        ; No callee-register is modified by ft_isspace but rax. We take that into account so we do not have to restore it.
+
+        ; Verify if sign character found.
+        ; ft_issign: { args: [rdi = character/byte], ret: [rax is 1 if sign, else 0.] }   
+        call        ft_issign                               ; Call 'ft_issign'.
+        test        rax, rax                                ; Check output of 'ft_issign'. If different than 0 it means a sign has been found.
+        jnz         .base_error                             ; If sign found, jump to .base_error.
+        ; No callee-register is modified by ft_issign but rax. We take that into account so we do not have to restore it.
 
         ; Verify if duplicate character.
         mov         dl, byte [rsp + rdi]                    ; Retrieve the hashmap's value relative to the character contained in dil (rdi).
@@ -99,6 +118,10 @@ ft_check_base:
         ; Loop.
         inc         rcx                                     ; Increment rcx to read through string.
         jmp         .loop                                   ; Jump to .loop unconditionally.
+
+    .check_length:
+        cmp         rcx, 1                                  ; Check if rcx (index to read string) found null at index 1: thus string is of length 1.
+        jg          .end                                    ; If rcx is > 1, jump to .end. Else it means there is a base_error.
 
     .base_error:
         mov         rax, 1                                  ; Set rax to one because duplicate has been found.
@@ -123,7 +146,7 @@ section .text
     ; Function entry-point for linker.
     global  ft_isspace
 
-    ; Information on ft_list_split.
+    ; Information on ft_isspace.
         ; Arguments:
         ;   RDI - Contains byte/char to check.
         ; Returns:
@@ -134,7 +157,7 @@ ft_isspace:
             endbr64                                         ; Branch prediction hint (control flow enforcement technology).
 
         ; Initialization.
-        xor         rax, rax                                ; Initialize rax to 1 to indicate byte is not an ascii whitespace.
+        xor         rax, rax                                ; Initialize rax to 0 to indicate byte is not an ascii whitespace.
 
         ; Check if between 8 and 13 (ascii decimal range for whitespaces)
         cmp         dil, 8                                  ; Compare dil (rdi's 8 LSB) to 8 (lower bound to whitespace ascii characters)
@@ -146,6 +169,46 @@ ft_isspace:
 
     .whitespace_found:
         mov         rax, 1                                  ; Set rax to 1 to indicate the byte is a whitespace.
+
+    .end:
+        ret                                                 ; Return (by default expects the content of rax).
+
+;;; ; ================================================================ ; ;;;
+;;; ;                            ft_issign                             ; ;;;
+;;; ; ================================================================ ; ;;;
+
+section .text
+    ; Padding to align to 16 bytes.
+    align   16
+
+    ; External symbol declarations: start.
+    ; External symbol declarations: end.
+
+    ; Function entry-point for linker.
+    global  ft_issign
+
+    ; Information on ft_issign.
+        ; Arguments:
+        ;   RDI - Contains byte/char to check.
+        ; Returns:
+        ;   RAX - 1 if it is a sign. Else a 0.
+
+ft_issign:
+    ; ft_issign initialization.
+            endbr64                                         ; Branch prediction hint (control flow enforcement technology).
+
+        ; Initialization.
+
+        mov         rax, 1                                  ; Initialize rax to 1 to indicate byte is an ascii sign (+ or -).
+
+        ; Check if between 8 and 13 (ascii decimal range for whitespaces)
+        cmp         dil, 43                                 ; Compare dil (rdi's 8 LSB) to 43 (dec ascii value of +)
+        jz          .end                                    ; If dil (rdi's 8 LSB) is == to 43 (dec ascii +), jump to .end (return 1 to signifiy sign found).
+        cmp         dil, 45                                 ; Compare dil with 45 (dec ascii value for -).
+        jz          .end                                    ; If dil (rdi's 8 LSB) is == to 45 (dec ascii -), jump to .end (return 1 to signifiy sign found).
+
+    .no_sign_found:
+        xor         rax, rax                                ; Set rax to 0 through XOR operation to indicate the byte is not an ascii sign(+ or -).
 
     .end:
         ret                                                 ; Return (by default expects the content of rax).

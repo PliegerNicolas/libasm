@@ -17,7 +17,11 @@ void    test_ft_atoi_base()
 {
 	printf("%sTest_ft_atoi_base%s\n", YELLOW, RESET_COLOR);
 
-    printf("%d\n", ft_atoi_base("Random string", "0123456789ABCDEF"));
+	char	*str = "Salut";
+
+	//printf("%d\n", ft_atoi_base("Random string", ""));
+    printf("%d\n", ft_atoi_base(str, "0123456789ABCDEF"));
+	printf("%s\n", str);
 
 	printf("\n");
 }
