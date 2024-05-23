@@ -239,8 +239,8 @@ ft_list_merge:
         mov         rax, rsi                                ; Set rax (return value) to right_half.
 
     .end:
-        add     rsp, ALLOC_MERGE                            ; Deallocate memory on stack.
-        pop     rbp                                         ; Restore previous base pointer and remove it from the top of the stack.
+        add         rsp, ALLOC_MERGE                        ; Deallocate memory on stack.
+        pop         rbp                                     ; Restore previous base pointer and remove it from the top of the stack.
         ret                                                 ; Return (by default expects the content of rax).
 
 ;;; ; ================================================================ ; ;;;
