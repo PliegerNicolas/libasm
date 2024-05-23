@@ -60,7 +60,7 @@ section .text
         ;   RAX - 0 if valid base. 1 if invalid base.
 
 ft_check_base:
-    ; ft_check_for_duplicates.
+    ; ft_check_base.
         endbr64                                             ; AMD specific branch prediction hint.
         push        rbp                                     ; Push previous base pointer on top of stack.
         mov         rbp, rsp                                ; Setup base pointer to current top of the stack.
@@ -70,10 +70,10 @@ ft_check_base:
         sub         rsp, ASCII_LENGTH                       ; allocate 128 bytes on stack. It will be used as a hashmap equivalent. 128 bytes as for 128 ascii characters.
 
         vpxor       ymm0, ymm0                              ; Set ymm0 to 0x0 throuh XOR operation. This register is of size 32 bytes (256 bits).
-        vmovdqu     [rsp + 0], ymm0                         ; Initialize the allocated data on stack to 0x0.
-        vmovdqu     [rsp + 32], ymm0                        ; Initialize the allocated data on stack to 0x0.
-        vmovdqu     [rsp + 64], ymm0                        ; Initialize the allocated data on stack to 0x0.
-        vmovdqu     [rsp + 96], ymm0                        ; Initialize the allocated data on stack to 0x0.
+        vmovdqu     [rbp - 32], ymm0                         ; Initialize the allocated data on stack to 0x0.
+        vmovdqu     [rbp - 64], ymm0                        ; Initialize the allocated data on stack to 0x0.
+        vmovdqu     [rbp - 96], ymm0                        ; Initialize the allocated data on stack to 0x0.
+        vmovdqu     [rbp - 128], ymm0                        ; Initialize the allocated data on stack to 0x0.
 
         mov         r8, rdi                                 ; Cpy rdi to r8 to preserve it.
 
@@ -87,20 +87,20 @@ ft_check_base:
         ; ft_isspace: { args: [rdi = character/byte], ret: [rax is 1 if whitespace, else 0.] }   
         call        ft_isspace                              ; Call 'ft_isspace'.
         test        rax, rax                                ; Check output of 'ft_isspace'. If different than 0 it means a whitespace has been found.
-        jnz         .end                                    ; If whitespace found, jump to .end.
+        jnz         .base_error                             ; If whitespace found, jump to .end.
         ; RDI isn't modified by ft_isspace. We take that into account so we do not have to restore it.
 
         ; Verify if duplicate character.
-        mov         dl, byte [rbp + rdi]                    ; Retrieve the hashmap's value relative to the character contained in dil (rdi).
+        mov         dl, byte [rsp + rdi]                    ; Retrieve the hashmap's value relative to the character contained in dil (rdi).
         test        dl, dl                                  ; Check if dl (hashmap value relative to character stored in al (rax)) is 0x0 (it means it hasn't been found in string yet).
-        jnz         .duplicate_found                        ; If dl != 0, jump to .duplicate_found.
-        not         byte [rbp + rdi]                        ; Invert value in hashmap to make it different from 0x0. This marks it as already found once.
+        jnz         .base_error                             ; If dl != 0, jump to .duplicate_found.
+        not         byte [rsp + rdi]                        ; Invert value in hashmap to make it different from 0x0. This marks it as already found once.
 
         ; Loop.
         inc         rcx                                     ; Increment rcx to read through string.
         jmp         .loop                                   ; Jump to .loop unconditionally.
 
-    .duplicate_found:
+    .base_error:
         mov         rax, 1                                  ; Set rax to one because duplicate has been found.
 
     .end:
@@ -139,10 +139,12 @@ ft_isspace:
         ; Check if between 8 and 13 (ascii decimal range for whitespaces)
         cmp         dil, 8                                  ; Compare dil (rdi's 8 LSB) to 8 (lower bound to whitespace ascii characters)
         jb          .end                                    ; If dil (rdi's 8 LSB) lower than 8, jump to .end (return 0 as byte is not a whitespace character).
+        cmp         dil, 32                                 ; Compare dil with 32 (dec ascii value for space).
+        jz          .whitespace_found                       ; If dil contains space, jump to .whitespace_found.
         cmp         dil, 13                                 ; Compare dil (rdi's 8 LSB) to 13 (upper bound to whitespace ascii characters)
         jg          .end                                    ; If dil (rdi's 8 LSB) bigger than 13, jump to .end (return 0 as byte is not a whitespace character).
 
-        ; Update return value if tests passed.
+    .whitespace_found:
         mov         rax, 1                                  ; Set rax to 1 to indicate the byte is a whitespace.
 
     .end:
