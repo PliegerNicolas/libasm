@@ -23,6 +23,7 @@ ft_atoi_base:
 
     ; Initialize registers.
         push        rbx                                     ; Store rbx in stack as it is a caller-saved register.
+        mov         rbx, rdi                                ; Store rdi in rbx to preserve it.
         xor         rax, rax                                ; Initialize rax to 0 as it is the return value in case an error occurs.
         xor         rcx, rcx                                ; Initialize rcx to 0 as it is the read index in loops for strings.
 
@@ -34,12 +35,12 @@ ft_atoi_base:
 
     ; Check base.
         ; ft_check_base: { args: [rdi = Pointer to base string], ret: [rax is set to 0 if valid base. Else 1.] }
-        mov         rbx, rdi                                ; Store rdi in rbx to preserve it.
         mov         rdi, rsi                                ; Set rdi to pointer to base string as requested by 'ft_check_base'.
         call ft_check_base                                  ; Call 'ft_check_base'.
         mov         rdi, rbx                                ; Restire rdi from rbx.
 
     .end:
+        mov         rdi, rbx                                ; Restore original rdi (pointer to string).
         pop         rbx                                     ; Restore rbx from stack.
         pop         rbp                                     ; Restore previous base pointer and remove it from the top of the stack.
         ret                                                 ; Return (by default expects the content of rax).
