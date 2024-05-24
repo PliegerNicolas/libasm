@@ -44,6 +44,9 @@ ft_atoi_base:
         test        rdi, rdi                                ; Check if rdi is 0x0 (null).
         jz          .end                                    ; If zero flag is set thus rdi is null, jump to .end.
 
+    ; Set rax to 0 to get set it has default value.
+        xor         rax, rax                                ; Set rax to 0 through XOR operation.
+
     ; Skip whitespaces in string.
     .skip_whitespaces:
         mov         dl, byte [rdi]                          ; Retrieve current byte/char from rdi.
@@ -62,7 +65,23 @@ ft_atoi_base:
         jmp         .skip_whitespaces                       ; Jump unconditionally to .skip_whitespaces.
 
     .get_sign:
-        
+        mov         dl, byte [rdi]                          ; Retrieve current byte/char from rdi.
+    ; Check for end of string.
+        test        dl, dl                                  ; Check if dl is 0x0 (null) to signify end of string.
+        jz          .end                                    ; Jump to .end. Rax is already set to 0 as there would be nothing to convert to int.
+    ; Check if current byte is a sign character ("+-") and update sign accordingly.
+        cmp         dl, 43                                  ; Check if dl is decimal representation of ascii character '-'.
+        jz          .minus_sign                             ; If dl == '-', jump to .minus_sign.
+        cmp         dl, 45                                  ; Check if dl is decimal representation of ascii character '+'.
+        jnz         .convert_to_dec                         ; If not '+' (nor '+'), jump to .convert_to_dec.
+    .minus_sign:
+        neg         eax                                     ; EAX MAYBE ??????????????
+    ; Nove to next loop iteration.
+        inc         rdi
+        jmp         .get_sign
+
+    .convert_to_dec:
+        ; ???
 
     .end:
         mov         rdi, [rsp + STRING_PTR]                 ; Restore string to scan pointer.
