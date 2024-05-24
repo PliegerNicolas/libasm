@@ -21,27 +21,12 @@ ft_atoi_base:
         push        rbp                                     ; Push previous base pointer on top of stack.
         mov         rbp, rsp                                ; Setup base pointer to current top of the stack.
 
-    ; Initialize registers.
-        push        rbx                                     ; Store rbx in stack as it is a caller-saved register.
-        mov         rbx, rdi                                ; Store rdi in rbx to preserve it.
-        xor         rax, rax                                ; Initialize rax to 0 as it is the return value in case an error occurs.
-        xor         rcx, rcx                                ; Initialize rcx to 0 as it is the read index in loops for strings.
-
-    ; Verify arguments.
-        test        rdi, rdi                                ; Verify if rdi (s) is 0x0 (null).
-        jz          .end                                    ; If rdi (s) is null, jump to .end.
-        test        rsi, rsi                                ; Verify if rsi (base) is 0x0 (null).
-        jz          .end                                    ; If rsi (s) is null, jump to .end.
-
     ; Check base.
         ; ft_check_base: { args: [rdi = Pointer to base string], ret: [rax is set to 0 if valid base. Else 1.] }
         mov         rdi, rsi                                ; Set rdi to pointer to base string as requested by 'ft_check_base'.
-        call ft_check_base                                  ; Call 'ft_check_base'.
-        mov         rdi, rbx                                ; Restire rdi from rbx.
+        call        ft_check_base                           ; Call 'ft_check_base'.
 
     .end:
-        mov         rdi, rbx                                ; Restore original rdi (pointer to string).
-        pop         rbx                                     ; Restore rbx from stack.
         pop         rbp                                     ; Restore previous base pointer and remove it from the top of the stack.
         ret                                                 ; Return (by default expects the content of rax).
 
@@ -63,7 +48,7 @@ section .text
 
     ; Information on ft_list_split.
         ; Arguments:
-        ;   RDI - Contains pointer to string to check (s)
+        ;   RDI - Contains pointer to string to check (base)
         ; Returns:
         ;   RAX - 0 if valid base. 1 if invalid base.
 
@@ -74,144 +59,61 @@ ft_check_base:
         mov         rbp, rsp                                ; Setup base pointer to current top of the stack.
 
     ; Initialization.
-        ; Initialize hashmap to check for duplicates relative to ascii characters.
-        sub         rsp, ASCII_LENGTH                       ; allocate 128 bytes on stack. It will be used as a hashmap equivalent. 128 bytes as for 128 ascii characters.
-
+        sub         rsp, ASCII_TABLE_LENGTH                 ; Allocate on stack 128 bytes. We will use those bytes to check if a character has already been found or not as if it was a hashmap equivalent.
         vpxor       ymm0, ymm0                              ; Set ymm0 to 0x0 throuh XOR operation. This register is of size 32 bytes (256 bits).
-        vmovdqu     [rbp - 32], ymm0                         ; Initialize the allocated data on stack to 0x0.
+        vmovdqu     [rbp - 32], ymm0                        ; Initialize the allocated data on stack to 0x0.
         vmovdqu     [rbp - 64], ymm0                        ; Initialize the allocated data on stack to 0x0.
         vmovdqu     [rbp - 96], ymm0                        ; Initialize the allocated data on stack to 0x0.
-        vmovdqu     [rbp - 128], ymm0                        ; Initialize the allocated data on stack to 0x0.
+        vmovdqu     [rbp - 128], ymm0                       ; Initialize the allocated data on stack to 0x0.
 
-        ; Verify if rdi (str) is null.
-        test        rdi, rdi
-        jz          .base_error
+        mov         rax, 1                                  ; Initialize rax to 1 (indicating an error). This way, if we return prematurely the right value is set.
 
-        ; Preserve data.
-        mov         r8, rdi                                 ; Cpy rdi to r8 to preserve it.
+    ; Verify if rdi (base) is set to 0x0 (null).
+        test        rdi, rdi                                ; Verify if rdi is not null (0x0). If it is, return an error.
+        jz          .end                                    ; If zero flag set (rdi == 0x0), return an error.
 
-    .loop:
-        ; Verify if null byte reached.
-        movzx       rdi, byte [r8 + rcx]                    ; Read r8 byte per byte (string). Store it in rdi and pad the extra space of rdi's register with 0s.
-        test        dil, dil                                ; Check if dil (8 LSB of rdi) isn't null byte. If it is it means we reached end of string.
-        jz          .check_length                           ; If end of string reached, jump to .end.
+    ; Verify length of base. If <= 1, error.
+        mov         dl, byte [rdi]                          ; Set dl (8bit register) to first character/byte of rdi.
+        test        dl, dl                                  ; Check if dl is null byte (0x0), indicating end of string.
+        jz          .end                                    ; If zero flag set (dl == 0x0), return an error.
+        mov         dl, byte [rdi + 1]                      ; Set dl (8bit register) to second character/byte of rdi.
+        test        dl, dl                                  ; Check if dl is null byte (0x0), indicating end of string.
+        jz          .end                                    ; If zero flag set (dl == 0x0), return an error.
 
-        ; Verify if whitespace character found.
-        ; ft_isspace: { args: [rdi = character/byte], ret: [rax is 1 if whitespace, else 0.] }   
-        call        ft_isspace                              ; Call 'ft_isspace'.
-        test        rax, rax                                ; Check output of 'ft_isspace'. If different than 0 it means a whitespace has been found.
-        jnz         .base_error                             ; If whitespace found, jump to .base_error.
-        ; No callee-register is modified by ft_isspace but rax. We take that into account so we do not have to restore it.
+    ; Scan byte/byte the base. If there is a duplicate character, a whitespace (" \b\t\n\v\f\r") or a sign ("+-"), return an error.
+    .char_checker:
+        movzx       rdx, byte [rdi]                         ; Store in rdx (dl) the first/current character of rdi. We use movzx so we can use rdx later on as offset for our hashmap.
+                                                            ;   It permits copying a smaller register to a bigger one, completing the extra bits with 0.
+        test        dl, dl                                  ; Verify if null byte hasn't been reached (dl == 0x0).
+        jz          .base_valid                             ; Jump to .base_valid if null byte reached and no errors found before.
+    ; Check if current byte is a sign ("+-").
+        cmp         dl, 43                                  ; Check if dl is decimal representation of ascii character '-'.
+        jz          .end                                    ; Verify if zero flag set (dl == 43). If it is, jump to .end.
+        cmp         dl, 45                                  ; Check if dl is decimal representation of ascii character '+'.
+        jz          .end                                    ; Verify if zero flag set (dl == 45). If it is, jump to .end.
+    ; Check if current byte is a whitespace character (" \b\t\n\v\f\r").
+        cmp         dl, 32                                  ; Check if dl is decimal representation of ascii character ' '.
+        jz          .end                                    ; Verify if zero flag set (dl == 32). If it is, jump to .end.
+        cmp         dl, 8                                   ; Check if dl is < to ascii's table lower bound of whitespace characters.
+        jb          .not_a_whitespace                       ; If dl is < to '\b' (8), jump to .not_a_whitespace.
+        cmp         dl, 13                                  ; Check if dl is > to ascii's table lower bound of whitespace characters.
+        jg          .not_a_whitespace                       ; If dl is > to '\r' (13), jump to .not_a_whitespace.
+        jmp         .end                                    ; Jump unconditionally to .end, because a whitespace has been found.
 
-        ; Verify if sign character found.
-        ; ft_issign: { args: [rdi = character/byte], ret: [rax is 1 if sign, else 0.] }   
-        call        ft_issign                               ; Call 'ft_issign'.
-        test        rax, rax                                ; Check output of 'ft_issign'. If different than 0 it means a sign has been found.
-        jnz         .base_error                             ; If sign found, jump to .base_error.
-        ; No callee-register is modified by ft_issign but rax. We take that into account so we do not have to restore it.
+    .not_a_whitespace:
+        mov         cl, byte [rsp + rdx]                    ; Store in cl the hashmap's byte representing if character has already been found or not. The byte is found in stack with offset of dl (rdx) bytes).
+        test        cl, cl                                  ; Verify if cl is 0x0 (null). If it's null, it means the character hasn't been found yet.
+        jnz         .end                                    ; If zero flag is set (cl != 0x0), a duplicate character has been found. Jump to .end.
+        mov         byte [rsp + rdx], 1                     ; Invert bits to make it different than 0x0, indicating the character has been found.
+        inc         rdi                                     ; Increment rdi by once, to move it one byte forward.
+        jmp         .char_checker                           ; Jump unconditionally to .char_checker to loop it.
 
-        ; Verify if duplicate character.
-        mov         dl, byte [rsp + rdi]                    ; Retrieve the hashmap's value relative to the character contained in dil (rdi).
-        test        dl, dl                                  ; Check if dl (hashmap value relative to character stored in al (rax)) is 0x0 (it means it hasn't been found in string yet).
-        jnz         .base_error                             ; If dl != 0, jump to .duplicate_found.
-        not         byte [rsp + rdi]                        ; Invert value in hashmap to make it different from 0x0. This marks it as already found once.
-
-        ; Loop.
-        inc         rcx                                     ; Increment rcx to read through string.
-        jmp         .loop                                   ; Jump to .loop unconditionally.
-
-    .check_length:
-        cmp         rcx, 1                                  ; Check if rcx (index to read string) found null at index 1: thus string is of length 1.
-        jg          .end                                    ; If rcx is > 1, jump to .end. Else it means there is a base_error.
-
-    .base_error:
-        mov         rax, 1                                  ; Set rax to one because duplicate has been found.
+    .base_valid:
+        xor             rax, rax
 
     .end:
-        mov         rdi, r8                                 ; Restore rdi (original string pointer).
-        add         rsp, ASCII_LENGTH                       ; Dellocate memory from stack.
+        add         rsp, ASCII_TABLE_LENGTH                 ; Deallocate data from stack for ascii table hashmap equivalent.
         pop         rbp                                     ; Restore previous base pointer and remove it from the top of the stack.
-        ret                                                 ; Return (by default expects the content of rax).
-
-;;; ; ================================================================ ; ;;;
-;;; ;                            ft_isspace                            ; ;;;
-;;; ; ================================================================ ; ;;;
-
-section .text
-    ; Padding to align to 16 bytes.
-    align   16
-
-    ; External symbol declarations: start.
-    ; External symbol declarations: end.
-
-    ; Function entry-point for linker.
-    global  ft_isspace
-
-    ; Information on ft_isspace.
-        ; Arguments:
-        ;   RDI - Contains byte/char to check.
-        ; Returns:
-        ;   RAX - 1 if it is a whitespace. Else a 0.
-
-ft_isspace:
-    ; ft_isspace initialization.
-            endbr64                                         ; Branch prediction hint (control flow enforcement technology).
-
-        ; Initialization.
-        xor         rax, rax                                ; Initialize rax to 0 to indicate byte is not an ascii whitespace.
-
-        ; Check if between 8 and 13 (ascii decimal range for whitespaces)
-        cmp         dil, 8                                  ; Compare dil (rdi's 8 LSB) to 8 (lower bound to whitespace ascii characters)
-        jb          .end                                    ; If dil (rdi's 8 LSB) lower than 8, jump to .end (return 0 as byte is not a whitespace character).
-        cmp         dil, 32                                 ; Compare dil with 32 (dec ascii value for space).
-        jz          .whitespace_found                       ; If dil contains space, jump to .whitespace_found.
-        cmp         dil, 13                                 ; Compare dil (rdi's 8 LSB) to 13 (upper bound to whitespace ascii characters)
-        jg          .end                                    ; If dil (rdi's 8 LSB) bigger than 13, jump to .end (return 0 as byte is not a whitespace character).
-
-    .whitespace_found:
-        mov         rax, 1                                  ; Set rax to 1 to indicate the byte is a whitespace.
-
-    .end:
-        ret                                                 ; Return (by default expects the content of rax).
-
-;;; ; ================================================================ ; ;;;
-;;; ;                            ft_issign                             ; ;;;
-;;; ; ================================================================ ; ;;;
-
-section .text
-    ; Padding to align to 16 bytes.
-    align   16
-
-    ; External symbol declarations: start.
-    ; External symbol declarations: end.
-
-    ; Function entry-point for linker.
-    global  ft_issign
-
-    ; Information on ft_issign.
-        ; Arguments:
-        ;   RDI - Contains byte/char to check.
-        ; Returns:
-        ;   RAX - 1 if it is a sign. Else a 0.
-
-ft_issign:
-    ; ft_issign initialization.
-            endbr64                                         ; Branch prediction hint (control flow enforcement technology).
-
-        ; Initialization.
-
-        mov         rax, 1                                  ; Initialize rax to 1 to indicate byte is an ascii sign (+ or -).
-
-        ; Check if between 8 and 13 (ascii decimal range for whitespaces)
-        cmp         dil, 43                                 ; Compare dil (rdi's 8 LSB) to 43 (dec ascii value of +)
-        jz          .end                                    ; If dil (rdi's 8 LSB) is == to 43 (dec ascii +), jump to .end (return 1 to signifiy sign found).
-        cmp         dil, 45                                 ; Compare dil with 45 (dec ascii value for -).
-        jz          .end                                    ; If dil (rdi's 8 LSB) is == to 45 (dec ascii -), jump to .end (return 1 to signifiy sign found).
-
-    .no_sign_found:
-        xor         rax, rax                                ; Set rax to 0 through XOR operation to indicate the byte is not an ascii sign(+ or -).
-
-    .end:
         ret                                                 ; Return (by default expects the content of rax).
 
 ;;; ; ================================================================ ; ;;;
@@ -219,5 +121,5 @@ ft_issign:
 ;;; ; ================================================================ ; ;;;
 
 section .data
-    ; Heap helpers
-    ASCII_LENGTH        equ         128                     ; Bytes necessary to store 128 ascii characters.
+    ; List helpers.
+    ASCII_TABLE_LENGTH          equ         128             ; Number of characters found in the ascii table.
