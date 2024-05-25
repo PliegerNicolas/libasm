@@ -43,6 +43,10 @@ ft_atoi_base:
         lea         rsi, [rbp - LEFT_BITMASK]               ; Load effective address in stack of bitmask (ptr to xmm0).
         call        ft_check_base                           ; Call 'ft_check_base'.
 
+    ; Check output of 'ft_check_base'
+        test        rax, rax                                ; Verify if rax != 0x0 (null). 1 Means valid base, 0 means invalid base.
+        jz          .end                                    ; If zero flag set, it means the base is invalid.
+
     ; Restore registers after function call.
         movdqu      xmm0, [rsi]                             ; Update the bitmask stored in xmm0. This maps with it's bits the found characters in the base relative to their position in the ascii table.
         mov         rsi, rdi                                ; Restore rsi from rdi. 'ft_check_base' doesn't modify rdi.
