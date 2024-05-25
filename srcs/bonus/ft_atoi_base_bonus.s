@@ -116,7 +116,7 @@ ft_atoi_base:
         inc         rcx                                     ; Else, increment rcx by one to read next byte of base.
         jmp         .get_char_value_in_base                 ; Jump unconditionally to .get_char_value_in_base
     .add_converted_char_to_retval:
-        adc         eax, ecx                                ; Add index of relative byte in base to eax (rax).
+        add         eax, ecx                                ; Add index of relative byte in base to eax (rax).
         inc         rdi                                     ; increment rdi to get to next byte.
         jmp         .conversion_loop                        ; jump unconditionally to .conversion_loop to loop the conversion process.
 
