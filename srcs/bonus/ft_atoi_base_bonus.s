@@ -47,6 +47,7 @@ ft_atoi_base:
         mov         rdi, [rbp - STRING_PTR]                 ; Restore rdi to string pointer from stack.
         mov         r8, rax                                 ; Store the base's length in r8.
         xor         rax, rax                                ; Set rax to 0 through XOR operation.
+        xor         r9, r9                                  ; Initialize rcx to 0 through XOR operation. It will be used as '-' counter.
 
     ; Skip prepending whitespace characters.
     .skip_whitespace_chars:
@@ -66,22 +67,19 @@ ft_atoi_base:
         jmp         .skip_whitespace_chars                  ; Jump unconditionally to .skip_whitespace_chars
 
     .get_sign:
-    ; Check if current byte is a sign ("+-").
-    ; Check for null-byte.
+    ; Check if null null-byte found.
         mov         dl, [rdi]                               ; Read the first byte pointer to by rdi.
         test        dl, dl                                  ; Verify if dl is 0x0 (null), meaning that null byte has been found and end of string has been reached.
         jz          .end                                    ; If it's the case, jump to .end. Returns 0 (as nothing has been converted).
-    ; Check for sign byte ("+-").
-        cmp         dl, 43                                  ; Check if dl is decimal representation of ascii character '-'.
-        jz          .update_sign                            ; Verify if zero flag set (dl == 43). If it is a -, jump to .update_sign.
-        cmp         dl, 45                                  ; Check if dl is decimal representation of ascii character '+'.
-        jnz         .convert_to_integer                     ; Verify if zero flag not set (dl != 45). If it is not a +, jump to .convert_to_integer.
-        inc         rdi                                     ; Increment rdi pointer to get to the next byte.
-        jmp         .get_sign                               ; Jump unconditionally to .get_sign.
-    .update_sign:
-        ; update sign. ?????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
-        inc         rdi                                     ; Increment rdi pointer to get to the next byte.
-        jmp         .get_sign                               ; Jump unconditionally to .get_sign.
+    ; check if current byte is a sign character ("+-"). If it's a -, increment the '-' sign count to take advantage of the parity flag.
+        cmp         dl, 43                                  ; Check if dl is decimal representation of ascii character '+' (43).
+        jz          .get_sign_next_iter                     ; Verify if zero flag set (dl == 45). If it is a +, jump to .get_sign_next_iter.
+        cmp         dl, 45                                  ; Check if dl is decimal representation of ascii character '-' (45).
+        jnz         .convert_to_integer                     ; If it's neither a + or a -, jump to .convert_to_integer.
+        inc         r9                                      ; Increment r9 by one, to account for the found '-' signs.
+    .get_sign_next_iter:
+        inc         rdi
+        jmp         .get_sign                               ; Jump to .get_sign unconditionally.
 
     .convert_to_integer:
 
@@ -143,10 +141,10 @@ ft_check_base:
         test        dl, dl                                  ; Verify if null byte hasn't been reached (dl == 0x0).
         jz          .end                                    ; Jump to .end if null byte reached and no errors found before.
     ; Check if current byte is a sign ("+-").
-        cmp         dl, 43                                  ; Check if dl is decimal representation of ascii character '-'.
-        jz          .error_found                            ; Verify if zero flag set (dl == 43). If it is a -, jump to .error_found.
-        cmp         dl, 45                                  ; Check if dl is decimal representation of ascii character '+'.
-        jz          .error_found                            ; Verify if zero flag set (dl == 45). If it is a +, jump to .error_found.
+        cmp         dl, 43                                  ; Check if dl is decimal representation of ascii character '+' (43).
+        jz          .error_found                            ; Verify if zero flag set (dl == 43). If it is a +, jump to .error_found.
+        cmp         dl, 45                                  ; Check if dl is decimal representation of ascii character '-' (45).
+        jz          .error_found                            ; Verify if zero flag set (dl == 45). If it is a -, jump to .error_found.
     ; Check if current byte is a whitespace character (" \b\t\n\v\f\r").
         cmp         dl, 32                                  ; Check if dl is decimal representation of ascii character ' '.
         jz          .error_found                            ; Verify if zero flag set (dl == 32). If it is, jump to .error_found.
