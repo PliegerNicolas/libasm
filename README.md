@@ -79,6 +79,8 @@ In a function calling language, using a stack is quite efficient. It respects it
 When programming you should consider the stack and the following two registers.
 - RIP (instruction pointer). This one points to the address of the next instruction to execute (next function, next instruction ...). Every time you execute an instruction, EIP is modified to point to the next instruction.
 - RSP (stack pointer). When you call a function and jump else where in the code, you store the content of RIP on the top of the stack so we know where to return too. Before exiting your function, you retrive that value and set it in RIP so your function knows where to return to.
+- RBP (stack base pointer). This stores the address to the base of your current stack frame. (in c they are represented by {}). You update it every time you need to create a new set of local variables in stack (per instance when you call a function).
+
 
 Here are interesting videos explaining efficiently what you should know:
 - https://www.youtube.com/watch?v=RU5vUIl1vRs
