@@ -11,6 +11,8 @@ section .text
     ; Information on ft_atoi_base.
         ; Arguments:
         ;   RDI - Pointer to string (s) to convert to integer.
+        ;       Prefix whitespaces are skipped. If an odd number of "-" signs are present the value will be negative. It then evaluates the string until a null-byte found or character not in base.
+        ;       No checks for overflow or underflow are done (check max_int: 2147483647 and min_int: -2147483648).
         ;   RSI - Pointer to string (base) representing the base to convert to (0123456789ABCDEF for hex for example).
         ; Returns:
         ;   RAX - The converted value as an integer (32bits (eax)). On error, return 0.
@@ -83,15 +85,6 @@ ft_atoi_base:
 
     ; I SHOULD CHECK SOMEWHERE FOR OUT OF BOUND
 
-        ; rax used for value.
-        ; r8 used for length of base.
-        ; r9 used for number of '-'.
-        ; rdi used to hold string
-        ; rsi used to hold base string.
-        ; rdx to contain char with dl
-        ; rcx ???
-        ; r10 left bitmask.
-        ; r11 right bitmask.
     .convert_to_integer:
         movq        r10, xmm0                               ; Store 64 LSB of bitmask in r10.
         psrldq      xmm0, 8                                 ; Bitshift xmm0 by 8 bytes.
@@ -123,7 +116,7 @@ ft_atoi_base:
         inc         rcx                                     ; Else, increment rcx by one to read next byte of base.
         jmp         .get_char_value_in_base                 ; Jump unconditionally to .get_char_value_in_base
     .add_converted_char_to_retval:
-        add         eax, ecx                                ; Add index of relative byte in base to eax (rax).
+        adc         eax, ecx                                ; Add index of relative byte in base to eax (rax).
         inc         rdi                                     ; increment rdi to get to next byte.
         jmp         .conversion_loop                        ; jump unconditionally to .conversion_loop to loop the conversion process.
 

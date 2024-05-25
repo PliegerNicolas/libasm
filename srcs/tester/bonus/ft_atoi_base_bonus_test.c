@@ -17,7 +17,11 @@ void    test_ft_atoi_base()
 {
 	printf("%sTest_ft_atoi_base%s\n", YELLOW, RESET_COLOR);
 
-    printf("%d\n", ft_atoi_base("-A0F", "0123456789ABCDEF"));
+    //printf("%d\n", ft_atoi_base("-A0F", "0123456789ABCDEF"));
+	printf("%d\n", ft_atoi_base("2147483647", "0123456789"));
+	printf("%d\n", ft_atoi_base("-2147483648", "0123456789"));
+	printf("%d\n", ft_atoi_base("2147483648", "0123456789"));
+	printf("%d\n", ft_atoi_base("-2147483649", "0123456789"));
 	//printf("%d\n", ft_atoi_base(s, "0123"));
 
 	printf("\n");
