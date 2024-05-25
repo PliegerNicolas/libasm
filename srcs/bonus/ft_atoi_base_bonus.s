@@ -31,13 +31,59 @@ ft_atoi_base:
         mov         [rbp - BASE_PTR], rsi                   ; Store rsi in stack as base_ptr.
         movdqu      [rbp - LEFT_BITMASK], xmm0              ; Store xmm0 in stack as bitmask for ascii characters.
 
+    ; Check if rdi (string to convert) is 0x0 (null).
+        test        rdi, rdi                                ; check if rdi is 0x0 (null).
+        jz          .end                                    ; If zero flag set, jump to .end. It means an invalid string has been passed.
+
     ; Call 'ft_check_base'.
         ; ft_check_base: { args: [rdi = char *base, rsi = void *bitmask (as XMM register), rdx = ptr/addr of 'cmp' function], ret: [rax is set to length of base or 0 for error] }.
         mov         rdi, rsi                                ; Move base (rsi) to rdi, as requested by 'ft_check_base'.
         lea         rsi, [rbp - LEFT_BITMASK]               ; Load effective address in stack of bitmask (ptr to xmm0).
         call        ft_check_base                           ; Call 'ft_check_base'.
 
-        ;movdqu      xmm0, [rbp - LEFT_BITMASK]
+    ; Restore registers after function call.
+        movdqu      xmm0, [rsi]                             ; Update the bitmask stored in xmm0. This maps with it's bits the found characters in the base relative to their position in the ascii table.
+        mov         rsi, rdi                                ; Restore rsi from rdi. 'ft_check_base' doesn't modify rdi.
+        mov         rdi, [rbp - STRING_PTR]                 ; Restore rdi to string pointer from stack.
+        mov         r8, rax                                 ; Store the base's length in r8.
+        xor         rax, rax                                ; Set rax to 0 through XOR operation.
+
+    ; Skip prepending whitespace characters.
+    .skip_whitespace_chars:
+    ; Check for null-byte.
+        mov         dl, [rdi]                               ; Read the first byte pointer to by rdi.
+        test        dl, dl                                  ; Verify if dl is 0x0 (null), meaning that null byte has been found and end of string has been reached.
+        jz          .end                                    ; If it's the case, jump to .end. Returns 0 (as nothing has been converted).
+    ; Check if current byte is a whitespace character (" \b\t\n\v\f\r").
+        cmp         dl, 32                                  ; Check if dl is decimal representation of ascii character ' '.
+        jz          .skip_whitespace_chars_next_iter        ; If ' ' found, jump to .skip_whitespace_chars_next_iter to continue looping.
+        cmp         dl, 8                                   ; Check if dl is < to ascii's table lower bound of whitespace characters.
+        jb          .get_sign                               ; If dl is < to '\b' (8), we know it's not a whitespace character thus jump to .get_sign.
+        cmp         dl, 13                                  ; Check if dl is > to ascii's table higher bound of whitespace characters.
+        jg          .get_sign                               ; If dl is > to '\r' (13), we know it's not a whitespace character thus jump to .get_sign.
+    .skip_whitespace_chars_next_iter:
+        inc         rdi                                     ; Increment rdi pointer to get to the next byte.
+        jmp         .skip_whitespace_chars                  ; Jump unconditionally to .skip_whitespace_chars
+
+    .get_sign:
+    ; Check if current byte is a sign ("+-").
+    ; Check for null-byte.
+        mov         dl, [rdi]                               ; Read the first byte pointer to by rdi.
+        test        dl, dl                                  ; Verify if dl is 0x0 (null), meaning that null byte has been found and end of string has been reached.
+        jz          .end                                    ; If it's the case, jump to .end. Returns 0 (as nothing has been converted).
+    ; Check for sign byte ("+-").
+        cmp         dl, 43                                  ; Check if dl is decimal representation of ascii character '-'.
+        jz          .update_sign                            ; Verify if zero flag set (dl == 43). If it is a -, jump to .update_sign.
+        cmp         dl, 45                                  ; Check if dl is decimal representation of ascii character '+'.
+        jnz         .convert_to_integer                     ; Verify if zero flag not set (dl != 45). If it is not a +, jump to .convert_to_integer.
+        inc         rdi                                     ; Increment rdi pointer to get to the next byte.
+        jmp         .get_sign                               ; Jump unconditionally to .get_sign.
+    .update_sign:
+        ; update sign. ?????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
+        inc         rdi                                     ; Increment rdi pointer to get to the next byte.
+        jmp         .get_sign                               ; Jump unconditionally to .get_sign.
+
+    .convert_to_integer:
 
     .end:
         add         rsp, ALLOC_ATOI_BASE                    ; Deallocate memory from stack.
@@ -98,15 +144,15 @@ ft_check_base:
         jz          .end                                    ; Jump to .end if null byte reached and no errors found before.
     ; Check if current byte is a sign ("+-").
         cmp         dl, 43                                  ; Check if dl is decimal representation of ascii character '-'.
-        jz          .error_found                            ; Verify if zero flag set (dl == 43). If it is, jump to .end.
+        jz          .error_found                            ; Verify if zero flag set (dl == 43). If it is a -, jump to .error_found.
         cmp         dl, 45                                  ; Check if dl is decimal representation of ascii character '+'.
-        jz          .error_found                            ; Verify if zero flag set (dl == 45). If it is, jump to .end.
+        jz          .error_found                            ; Verify if zero flag set (dl == 45). If it is a +, jump to .error_found.
     ; Check if current byte is a whitespace character (" \b\t\n\v\f\r").
         cmp         dl, 32                                  ; Check if dl is decimal representation of ascii character ' '.
-        jz          .error_found                            ; Verify if zero flag set (dl == 32). If it is, jump to .end.
+        jz          .error_found                            ; Verify if zero flag set (dl == 32). If it is, jump to .error_found.
         cmp         dl, 8                                   ; Check if dl is < to ascii's table lower bound of whitespace characters.
         jb          .check_duplicates                       ; If dl is < to '\b' (8), we know it's not a whitespace character thus jump to .check_duplicates.
-        cmp         dl, 13                                  ; Check if dl is > to ascii's table lower bound of whitespace characters.
+        cmp         dl, 13                                  ; Check if dl is > to ascii's table higher bound of whitespace characters.
         jg          .check_duplicates                       ; If dl is > to '\r' (13), we know it's not a whitespace character thus jump to .check_duplicates.
         jmp         .error_found                            ; Jump unconditionally to .end, because a whitespace has been found.
     ; Check if current byte has already been found.
@@ -133,8 +179,8 @@ ft_check_base:
         xor         rax, rax                                ; Set rax to 0 through XOR operation on error.
 
     .end:
-        mov         [rsi + 0], r8
-        mov         [rsi + 8], r9
+        mov         [rsi + 0], r8                           ; Join the values of r8 and r9 in the stack through the pointer passed in rsi (it's the size of a xmm register (128bits: 8 bytes * 2)).
+        mov         [rsi + 8], r9                           ; Join the values of r8 and r9 in the stack through the pointer passed in rsi (it's the size of a xmm register (128bits: 8 bytes * 2)).
         pop         rbp                                     ; Restore previous base pointer and remove it from the top of the stack.
         ret                                                 ; Return (by default expects the content of rax).
 
