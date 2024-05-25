@@ -97,7 +97,7 @@ section .text
     ; External symbol declarations: end.
 
     ; Function entry-point for linker.
-    global  ft_list_split
+    ; local   ft_list_split
 
     ; Information on ft_list_split.
         ; Arguments:
@@ -169,7 +169,7 @@ section .text
     ; External symbol declarations: end.
 
     ; Function entry-point for linker.
-    global  ft_list_merge
+    ; local   ft_list_merge
 
     ; Information on ft_list_split.
         ; Arguments:

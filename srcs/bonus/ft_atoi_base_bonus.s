@@ -151,7 +151,7 @@ section .text
     ; External symbol declarations: end.
 
     ; Function entry-point for linker.
-    global  ft_check_base
+    ; local  ft_check_base
 
     ; Information on ft_list_split.
         ; Arguments:
