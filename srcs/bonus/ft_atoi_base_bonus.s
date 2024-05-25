@@ -47,7 +47,7 @@ ft_atoi_base:
         mov         rdi, [rbp - STRING_PTR]                 ; Restore rdi to string pointer from stack.
         mov         r8, rax                                 ; Store the base's length in r8.
         xor         rax, rax                                ; Set rax to 0 through XOR operation.
-        xor         r9, r9                                  ; Initialize rcx to 0 through XOR operation. It will be used as '-' counter.
+        xor         r9, r9                                  ; Initialize r9 to 0 through XOR operation. It will be used as '-' counter.
 
     ; Skip prepending whitespace characters.
     .skip_whitespace_chars:
@@ -71,7 +71,7 @@ ft_atoi_base:
         mov         dl, [rdi]                               ; Read the first byte pointer to by rdi.
         test        dl, dl                                  ; Verify if dl is 0x0 (null), meaning that null byte has been found and end of string has been reached.
         jz          .end                                    ; If it's the case, jump to .end. Returns 0 (as nothing has been converted).
-    ; check if current byte is a sign character ("+-"). If it's a -, increment the '-' sign count to take advantage of the parity flag.
+    ; check if current byte is a sign character ("+-"). If it's a -, increment the '-' sign count. We can later check if it is pair or not.
         cmp         dl, 43                                  ; Check if dl is decimal representation of ascii character '+' (43).
         jz          .get_sign_next_iter                     ; Verify if zero flag set (dl == 45). If it is a +, jump to .get_sign_next_iter.
         cmp         dl, 45                                  ; Check if dl is decimal representation of ascii character '-' (45).
@@ -81,7 +81,56 @@ ft_atoi_base:
         inc         rdi
         jmp         .get_sign                               ; Jump to .get_sign unconditionally.
 
+    ; I SHOULD CHECK SOMEWHERE FOR OUT OF BOUND
+
+        ; rax used for value.
+        ; r8 used for length of base.
+        ; r9 used for number of '-'.
+        ; rdi used to hold string
+        ; rsi used to hold base string.
+        ; rdx to contain char with dl
+        ; rcx ???
+        ; r10 left bitmask.
+        ; r11 right bitmask.
     .convert_to_integer:
+        movq        r10, xmm0                               ; Store 64 LSB of bitmask in r10.
+        psrldq      xmm0, 8                                 ; Bitshift xmm0 by 8 bytes.
+        movq        r11, xmm0                               ; Store 64 MSB (LSB but byte shifted) of bitmask in r11.
+
+    .conversion_loop:
+    ; Check for null-byte.
+        mov         dl, [rdi]                               ; Read the first byte pointer to by rdi.
+        test        dl, dl
+        jz          .update_conversion_sign                 ; If null-byte found, jump to .end. We return the current calculated value in rax.
+    ; Check if character is part of base (check bits set to 1 in bitmask).
+        cmp         dl, HALF_ASCII_TABLE_LENGTH              ; Compare with the value of half ascii table's length because our bitmask is separated in two 64bit registers.
+        jg          .right_half_ascii_bitmask               ; If dl (ascii char) is part of the right half of the ascii table, jump to .right_half_ascii_bitmask
+    .left_half_ascii_bitmask:
+        bts         r10, rdx                                ; Check bit and set the bit at rdx'th position. If bit was set on test, cf flag is set.
+        jnc         .update_conversion_sign                 ; If CF not flag set, that means char is not part of bitmask/base. We end conversion here. Jump to .update_conversion_sign.
+        jmp         .convert_char                           ; Jump unconditionally to convert_char.
+    .right_half_ascii_bitmask:
+        sub         dl, HALF_ASCII_TABLE_LENGTH             ; Substract from dl (char) 64 to accomodate for the split of the bitmask into 2 64bit registers.
+        bts         r11, rdx                                ; Check bit and set the bit at rdx'th position. If bit was set on test, cf flag is set.
+        jnc         .update_conversion_sign                 ; If CF not flag set, that means char is not part of bitmask/base. We end conversion here. Jump to .update_conversion_sign.
+        add         dl, HALF_ASCII_TABLE_LENGTH             ; Restore the value of dl.
+    .convert_char:
+        imul        eax, r8d                                ; Multiply the current value by size of base (r8's 32bit representation is r8d). We target eax cause an integer is a 32bit value.
+        xor         rcx, rcx                                ; Set rcx to 0. This will store the base-index/value of a specific byte relative to the base string.
+    .get_char_value_in_base:
+        cmp         dl, [rsi + rcx]                         ; Compare the current rdi byte (dl) with the rcx'th byte of rsi.
+        jz          .add_converted_char_to_retval           ; If equal, jump to .add_converted_char_to_retval.
+        inc         rcx                                     ; Else, increment rcx by one to read next byte of base.
+        jmp         .get_char_value_in_base                 ; Jump unconditionally to .get_char_value_in_base
+    .add_converted_char_to_retval:
+        add         eax, ecx                                ; Add index of relative byte in base to eax (rax).
+        inc         rdi                                     ; increment rdi to get to next byte.
+        jmp         .conversion_loop                        ; jump unconditionally to .conversion_loop to loop the conversion process.
+
+    .update_conversion_sign:
+        test        r9, 1                                   ; Compare r9 (number of found - as prefix) and compare it with 1. This checks if LSB of r9 is set or not.
+        jz          .end                                    ; If zero flag is set, it means that the number of '-' is pair. That means the value is positive. Jump to .end.
+        neg         eax                                     ; Else, negative eax (set sign bit to 1).
 
     .end:
         add         rsp, ALLOC_ATOI_BASE                    ; Deallocate memory from stack.
